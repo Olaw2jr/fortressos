@@ -15,6 +15,7 @@ This document provides guidelines for contributing to FortressOS to ensure a smo
   - [Improving Documentation](#improving-documentation)
   - [Translations](#translations)
 - [Getting Started (Development Environment)](#getting-started-development-environment)
+- [Tech Stack Overview](#tech-stack-overview)
 - [Development Guidelines](#development-guidelines)
   - [Branching Strategy](#branching-strategy)
   - [Commit Messages](#commit-messages)
@@ -27,8 +28,6 @@ This document provides guidelines for contributing to FortressOS to ensure a smo
 ## Code of Conduct
 
 All contributors and participants in the FortressOS community are expected to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please read it to understand the standards of behavior we expect and what actions will be taken in case of violations. We are committed to fostering an open, welcoming, and inclusive environment.
-
-*(Note: You will need to create a `CODE_OF_CONDUCT.md` file. You can adapt one from a template like the [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).)*
 
 ## How Can I Contribute?
 
@@ -45,6 +44,8 @@ If you encounter a bug, please help us by reporting it!
     - Actual behavior.
     - Screenshots or error messages (if applicable).
     - Your FortressOS version, browser, and operating system.
+    - For UI/component issues, specify the affected Shadcn UI component(s).
+    - For data validation issues, include relevant schema information.
     - Use the "Bug Report" issue template if available.
 
 ### Suggesting Enhancements
@@ -79,7 +80,19 @@ If you're fluent in other languages, helping translate FortressOS would be a fan
 
 ## Getting Started (Development Environment)
 
-For instructions on how to set up your local development environment to work on FortressOS, please refer to the "Manual Setup for Development" section in our main [README.md](README.md) file or our more detailed `DEVELOPMENT_GUIDE.md` (if available).
+For instructions on how to set up your local development environment to work on FortressOS, please refer to the "Manual Setup for Development" section in our main [README.md](README.md) file or our more detailed [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md).
+
+## Tech Stack Overview
+
+FortressOS is built with modern web technologies. Understanding our tech stack will help you contribute effectively:
+
+- **Frontend Framework**: [Next.js](https://nextjs.org/) - React framework with server-side rendering, API routes, and file-based routing
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) - Collection of reusable components built with Radix UI and Tailwind CSS
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- **Database ORM**: [Prisma](https://www.prisma.io/) - Type-safe database client for Node.js and TypeScript
+- **Data Validation**: [Zod](https://zod.dev/) - TypeScript-first schema validation library
+
+Familiarity with these technologies will help you contribute effectively, but we welcome contributors at all skill levels. If you're new to any of these technologies, check out their respective documentation to learn more.
 
 Key tools you'll likely need:
 
@@ -93,15 +106,19 @@ Key tools you'll likely need:
 
 ### Branching Strategy
 
-We generally follow a Gitflow-like branching model:
+We follow a simplified GitFlow workflow to manage our codebase effectively:
 
-- `main`: Represents the latest stable release. Direct pushes are restricted. Merges happen from `develop` during a release.
-- `develop`: The primary development branch where features and fixes are integrated. This should be your base branch for feature development.
-- **Feature Branches:** Create new branches off `develop` for new features (e.g., `feat/user-authentication`, `feat/new-reporting-module`).
-  - Naming: `feat/<short-description>` or `feature/<short-description>`
-- **Bugfix Branches:** Create branches off `develop` (or `main` for hotfixes) for bug fixes (e.g., `fix/login-error`, `fix/asset-sorting-bug`).
+- **Main Branch (`main`):** Represents the production-ready state of the project. Should always be stable.
+- **Development Branch (`develop`):** Serves as the integration branch for new features and bug fixes. The primary branch for development.
+- **Feature Branches:** For developing new features or enhancements.
+  - Always branch off from `develop`.
+  - Naming: `feat/<short-description>` (e.g., `feat/user-risk-assessment-api`)
+- **Bug Fix Branches:** For addressing bugs.
+  - Branch off from `develop` (or relevant branch).
   - Naming: `fix/<short-description>` or `bugfix/<short-description>`
 - **Hotfix Branches:** For critical bugs in a release, branch off `main` (e.g., `hotfix/critical-security-patch`) and merge back into both `main` and `develop`.
+
+Consider using GitHub's branch protection rules to ensure quality standards are met before merging to important branches.
 
 ### Commit Messages
 
@@ -126,26 +143,65 @@ Closes #78
 
 ### Coding Style
 
-- **Frontend (TypeScript/Next.js/React):**
-  - Follow the style enforced by ESLint and Prettier (configuration will be provided in the repository).
-  - Adhere to React best practices (functional components, hooks, etc.).
+- **Next.js/React:**
+  - Follow the Next.js App Router patterns and conventions.
+  - Use React Server Components where appropriate to reduce client-side JavaScript.
+  - Implement functional components with React Hooks.
+  - Structure your components following the project's established patterns.
   - Use TypeScript for strong typing.
-- **Backend (Depends on chosen stack - e.g., TypeScript/Node.js):**
-  - Follow style enforced by ESLint and Prettier.
-  - Adhere to established patterns for the chosen framework.
+
+- **Shadcn UI & Tailwind CSS:**
+  - Use Shadcn UI components whenever possible instead of creating new ones.
+  - Follow the Tailwind CSS class ordering convention.
+  - Avoid inline styles; use Tailwind classes or CSS modules instead.
+  - Ensure responsive design is implemented for all UI components.
+
+- **Prisma ORM:**
+  - Follow the established schema design patterns in `prisma/schema.prisma`.
+  - Use Prisma Client for all database operations.
+  - Implement transactions for operations that require multiple database changes.
+  - Write efficient queries to minimize database load.
+
+- **Zod Schema:**
+  - Create consistent validation schemas in dedicated schema files.
+  - Reuse schema components where possible.
+  - Ensure proper error messages for validation failures.
+
 - **General:**
+  - Follow the style enforced by ESLint and Prettier.
   - Write clear, readable, and maintainable code.
-  - Add comments where necessary to explain complex logic.
+  - Add meaningful comments for complex logic.
   - Keep functions and modules focused on a single responsibility.
+  - Use meaningful variable and function names.
+  - Practice proper error handling throughout the codebase.
 
 ### Testing
 
-- **Unit Tests:** For individual functions, components, and modules. Aim for good coverage.
-- **Integration Tests:** To test interactions between different parts of the application.
-- **End-to-End (E2E) Tests (Future):** To test user flows through the UI.
-- All new features should include relevant tests.
-- All bug fixes should ideally include a test that reproduces the bug and verifies the fix.
-- Ensure all tests pass (`npm test` or `yarn test`) before submitting a PR.
+- **Unit Tests:** 
+  - Use Jest for testing utility functions and isolated logic.
+  - Use React Testing Library for component testing.
+  - Write tests for Zod schemas to ensure validation works as expected.
+  - Aim for good coverage of critical business logic.
+
+- **Integration Tests:** 
+  - Test interactions between different parts of the application.
+  - Test Prisma database operations with test databases.
+  - Test API routes with mocked requests/responses.
+
+- **End-to-End (E2E) Tests:**
+  - Use Playwright or Cypress to test complete user flows.
+  - Focus on critical user journeys through the application.
+
+- **Testing Best Practices:**
+  - All new features should include relevant tests.
+  - Bug fixes should include a test that reproduces the bug and verifies the fix.
+  - Mock external services appropriately.
+  - Use testing utilities provided by Next.js for testing app router components.
+  - Ensure all tests pass (`npm test` or `yarn test`) before submitting a PR.
+
+- **Performance Testing:**
+  - Consider using Lighthouse or other performance tools for critical pages.
+  - Verify bundle sizes haven't increased significantly with new changes.
 
 ## Pull Request (PR) Process
 
@@ -153,28 +209,63 @@ Closes #78
 2. **Clone your fork** locally: `git clone https://github.com/Olaw2jr/fortressos.git`
 3. **Create a new branch** from `develop` for your changes: `git checkout -b feat/my-new-feature develop`
 4. **Make your changes:** Implement your feature or fix the bug. Remember to write tests and adhere to coding guidelines.
-5. **Commit your changes** using clear and conventional commit messages.
-6. **Push your branch** to your fork: `git push origin feat/my-new-feature`
-7. **Open a Pull Request** on the FortressOS GitHub repository:
-    - Target the `develop` branch of the main FortressOS repository.
-    - Provide a clear title and a detailed description of your changes.
-    - Explain the "why" and "what" of your contribution.
-    - Reference any related issues (e.g., "Closes #123").
-    - Ensure all CI checks (linters, tests, builds) pass.
-8. **Code Review:** Project maintainers will review your PR. Be prepared to discuss your changes and address any feedback or requested modifications.
-9. **Merge:** Once your PR is approved and passes all checks, a maintainer will merge it into the `develop` branch. Congratulations and thank you!
+5. **Run checks locally:** Before pushing, run:
+   - `npm run lint` or `yarn lint` to ensure code style compliance
+   - `npm run test` or `yarn test` to run the test suite
+   - `npm run build` or `yarn build` to verify the build succeeds
+6. **Commit your changes** using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format.
+7. **Push your branch** to your fork: `git push origin feat/my-new-feature`
+8. **Open a Pull Request** on the FortressOS GitHub repository:
+   - Target the `develop` branch of the main repository.
+   - Use our PR template to provide all necessary information.
+   - Include screenshots for UI changes.
+   - Explain the "why" and "what" of your contribution.
+   - Reference any related issues (e.g., "Closes #123").
+   - Ensure all CI checks (linters, tests, builds) pass.
+   - Add labels relevant to your PR (e.g., `enhancement`, `bug`, `documentation`).
+9. **Code Review:** Project maintainers will review your PR. Be prepared to discuss your changes and address feedback.
+10. **Merge:** Once approved and passing all checks, a maintainer will merge it into the `develop` branch.
+
+PRs that add new features or make significant changes should update relevant documentation, including README files and inline code documentation.
 
 ## Issue Tracker Guidance
 
 - Use GitHub Issues to track bugs and feature requests.
-- Use appropriate labels to categorize issues (e.g., `bug`, `enhancement`, `documentation`, `good first issue`, `help wanted`).
+- Use appropriate labels to categorize issues:
+  - **Type Labels**: `bug`, `enhancement`, `documentation`, etc.
+  - **Priority Labels**: `high-priority`, `medium-priority`, `low-priority`
+  - **Status Labels**: `in-progress`, `needs-review`, `blocked`
+  - **Component Labels**: `ui`, `api`, `database`, `authentication`, etc.
+  - **Scope Labels**: `shadcn-ui`, `tailwind`, `prisma`, `zod`, `next.js`
+  - **Experience Labels**: `good-first-issue`, `help-wanted`
+- Provide detailed reproduction steps for bugs.
+- For UI issues, include screenshots or screen recordings when possible.
+- Link PRs to relevant issues using GitHub's built-in syntax (e.g., `Fixes #123`).
 - Be respectful and constructive in all discussions.
-- Provide as much context as possible when creating or commenting on issues.
+- Close resolved issues promptly with a clear explanation of the resolution.
 
 ## Questions & Communication
 
 - **For specific development questions related to an issue or PR:** Comment directly on the issue/PR.
 - **For general discussions, ideas, or help:** Join our [Discord Server](https://discord.gg/YOUR_DISCORD_INVITE_CODE) (replace with your actual link).
-- **For discussions about project direction or major features:** Consider starting a GitHub Discussion if the feature is enabled for the repository.
+- **For discussions about project direction or major features:** Use GitHub Discussions organized by category.
+- **For quick technical questions about our stack:**
+  - Next.js questions: Use the #next-js channel in Discord
+  - UI component questions: Use the #shadcn-ui channel in Discord
+  - Database/Prisma questions: Use the #prisma channel in Discord
+  - Schema validation questions: Use the #zod channel in Discord
+
+When asking questions, provide context, include code examples when relevant, and be specific about what you're trying to accomplish.
 
 Thank you for contributing to FortressOS! Your efforts help make this project better for everyone.
+
+---
+
+## Additional Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Shadcn UI Documentation](https://ui.shadcn.com/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [Zod Documentation](https://zod.dev/)
+- [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)

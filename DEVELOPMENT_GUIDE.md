@@ -2,7 +2,7 @@
 
 Welcome, contributor! This guide provides detailed instructions for setting up your development environment, understanding our project structure, and following our development workflows for FortressOS.
 
-We're thrilled to have you on board!
+We're thrilled to have you on board and look forward to your contributions to our Next.js application.
 
 ## Table of Contents
 
@@ -11,93 +11,587 @@ We're thrilled to have you on board!
 3. [Project Structure](#3-project-structure)
 4. [Environment Setup](#4-environment-setup)
     * [4.1 Cloning the Repository](#41-cloning-the-repository)
-    * [4.2 Monorepo Setup (Yarn Workspaces)](#42-monorepo-setup-yarn-workspaces)
+    * [4.2 Installing Dependencies](#42-installing-dependencies)
     * [4.3 Environment Variables](#43-environment-variables)
     * [4.4 Database Setup (PostgreSQL)](#44-database-setup-postgresql)
-    * [4.5 Backend Setup (NestJS)](#45-backend-setup-nestjs)
-    * [4.6 Frontend Setup (Next.js)](#46-frontend-setup-nextjs)
-    * [4.7 Running the Full Stack](#47-running-the-full-stack)
+    * [4.5 Running the Development Server](#45-running-the-development-server)
 5. [Development Workflow](#5-development-workflow)
     * [5.1 Branching Strategy](#51-branching-strategy)
     * [5.2 Making Changes](#52-making-changes)
-    * [5.3 API Communication](#53-api-communication)
-6. [Coding Standards & Conventions](#6-coding-standards--conventions)
-    * [6.1 TypeScript](#61-typescript)
-    * [6.2 Linters & Formatters (ESLint, Prettier)](#62-linters--formatters-eslint-prettier)
-    * [6.3 Naming Conventions](#63-naming-conventions)
-    * [6.4 API Design](#64-api-design)
-7. [Testing](#7-testing)
-    * [7.1 Running Tests](#71-running-tests)
-    * [7.2 Writing Tests](#72-writing-tests)
-8. [Debugging](#8-debugging)
-9. [Working with the Database](https://www.google.com/search?q=%239-working-with-the-database)
-    * [9.1 Migrations (TypeORM)](#91-migrations-typeorm)
-    * [9.2 Seeding Data](#92-seeding-data)
-    * [9.3 Database GUI Clients](#93-database-gui-clients)
-10. [Building for Production (Locally)](#10-building-for-production-locally)
-11. [Common Issues & Troubleshooting](#11-common-issues--troubleshooting)
-12. [Keeping Your Fork Updated](#12-keeping-your-fork-updated)
+    * [5.3 Working with the Next.js App Router](#53-working-with-the-nextjs-app-router)
+    * [5.4 Server Components vs. Client Components](#54-server-components-vs-client-components)
+    * [5.5 API Routes and Server Actions](#55-api-routes-and-server-actions)
+6. [UI Development](#6-ui-development)
+    * [6.1 Shadcn UI Components](#61-shadcn-ui-components)
+    * [6.2 Tailwind CSS Conventions](#62-tailwind-css-conventions)
+    * [6.3 Responsive Design Guidelines](#63-responsive-design-guidelines)
+7. [Data Management](#7-data-management)
+    * [7.1 Prisma ORM Basics](#71-prisma-orm-basics)
+    * [7.2 Schema Migrations](#72-schema-migrations)
+    * [7.3 Zod Schema Validation](#73-zod-schema-validation)
+    * [7.4 Form Handling](#74-form-handling)
+8. [Coding Standards & Conventions](#8-coding-standards--conventions)
+    * [8.1 TypeScript Best Practices](#81-typescript-best-practices)
+    * [8.2 Linters & Formatters (ESLint, Prettier)](#82-linters--formatters-eslint-prettier)
+    * [8.3 Naming Conventions](#83-naming-conventions)
+    * [8.4 Code Organization](#84-code-organization)
+9. [Testing](#9-testing)
+    * [9.1 Running Tests](#91-running-tests)
+    * [9.2 Writing Component Tests](#92-writing-component-tests)
+    * [9.3 API Testing](#93-api-testing)
+    * [9.4 E2E Testing](#94-e2e-testing)
+10. [Performance Optimization](#10-performance-optimization)
+11. [Debugging](#11-debugging)
+12. [Deployment](#12-deployment)
 
 ---
 
 ## 1. Introduction
 
-This guide is intended for developers contributing code to FortressOS. It complements the general information in `README.md` and `CONTRIBUTING.md`. Our goal is to make the development process as smooth and efficient as possible.
+This guide is intended for developers contributing code to FortressOS. It complements the general information in `README.md` and `CONTRIBUTING.md` and focuses specifically on the technical aspects of working with our Next.js application.
+
+FortressOS is built with a modern web technology stack centered around:
+
+* **Next.js** with the App Router architecture
+* **Shadcn UI** components for consistent and accessible interfaces
+* **Tailwind CSS** for styling
+* **Prisma ORM** for database management
+* **Zod** for schema validation
+
+This guide will help you understand how these technologies work together in our project and how to contribute effectively.
 
 ## 2. Prerequisites
 
 Please ensure you have the following tools installed on your system:
 
-* **Git:** Latest stable version.
-* **Node.js:** LTS version (e.g., v18.x or v20.x). Check `.nvmrc` if present. We recommend using [nvm](https://github.com/nvm-sh/nvm) to manage Node.js versions.
-* **Yarn:** Latest stable version (v1.x classic or v3.x berry - project will specify). For this guide, we'll assume Yarn v1.x.
-  * `npm install -g yarn`
-* **Docker & Docker Compose:** Latest stable versions (for running PostgreSQL easily, or for full app testing).
-* **IDE/Text Editor:** We recommend [Visual Studio Code (VS Code)](https://code.visualstudio.com/) with the following extensions:
+* **Git:** Latest stable version
+* **Node.js:** v18.17.0 or later (Next.js 14 requirement). We recommend using [nvm](https://github.com/nvm-sh/nvm) to manage Node.js versions
+* **Package Manager:** npm (included with Node.js), yarn, or pnpm. This guide will use npm in examples, but equivalent commands exist for other managers
+* **Docker:** Latest stable version (optional, but recommended for running PostgreSQL)
+* **PostgreSQL:** Version 14 or later (can be run via Docker)
+* **IDE/Text Editor:** We recommend [Visual Studio Code](https://code.visualstudio.com/) with the following extensions:
+
   * ESLint
-  * Prettier - Code formatter
-  * EditorConfig for VS Code
-  * DotENV (for `.env` file syntax highlighting)
-  * (Optional) Prisma or TypeORM extensions if specific ORM is chosen.
-  * (Optional) REST Client or Thunder Client for API testing.
-* **PostgreSQL Client:** A GUI tool like [pgAdmin](https://www.pgadmin.org/), [DBeaver](https://dbeaver.io/), or [Postico](https://eggerapps.at/postico2/) (macOS) can be helpful.
+  * Prettier
+  * Tailwind CSS IntelliSense
+  * Prisma VS Code Extension
+  * PostCSS Language Support
+  * GitHub Copilot (optional but helpful)
+
+### Recommended VS Code Extensions
+
+For the best development experience, we recommend installing the following VS Code extensions:
+
+```json
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "prisma.prisma",
+    "csstools.postcss",
+    "github.copilot",
+    "mikestead.dotenv",
+    "formulahendry.auto-rename-tag"
+  ]
+}
+```
+
+You can save this as `.vscode/extensions.json` in your project to recommend these extensions to other contributors.
 
 ## 3. Project Structure
 
-FortressOS is structured as a monorepo using Yarn Workspaces. This means the frontend, backend, and any shared packages are managed within a single Git repository.
+FortressOS follows the Next.js App Router architecture, making use of React Server Components and other modern patterns. This structure enables better performance, improved SEO, and a great developer experience.
 
-A typical structure might look like this:
+### Directory Layout
 
-```
+Here's the overall project structure:
+
+```plaintext
 fortressos/
-├── apps/
-│   ├── backend/         # NestJS backend application
-│   │   ├── src/
-│   │   ├── test/
-│   │   ├── Dockerfile
-│   │   └── package.json
-│   └── frontend/        # Next.js frontend application
-│       ├── app/
-│       ├── components/
-│       ├── public/
-│       ├── Dockerfile
-│       └── package.json
-├── packages/
-│   └── shared-types/    # Shared TypeScript types/interfaces between frontend & backend
-│       ├── src/
-│       └── package.json
-├── database/
-│   ├── migrations/      # Database migration files
-│   └── seeds/           # Database seed files
-├── .env.example         # Example environment variables for the entire stack
-├── .eslintrc.js
-├── .prettierrc.js
-├── docker-compose.yml   # For running services like PostgreSQL, or the full app
-├── package.json         # Root package.json for Yarn Workspaces
-└── yarn.lock
+├── .github/          # GitHub workflows and issue templates
+├── .vscode/          # VS Code configurations
+├── app/              # Next.js App Router structure
+│   ├── (auth)/       # Authentication routes (grouped)
+│   ├── api/          # API routes
+│   ├── dashboard/    # Dashboard pages
+│   ├── error.tsx      # Global error handling
+│   ├── layout.tsx     # Root layout with providers
+│   └── page.tsx       # Home page
+├── components/       # React components
+│   ├── ui/           # Shadcn UI components
+│   ├── forms/        # Form components
+│   ├── layouts/      # Layout components
+│   └── dashboard/    # Dashboard-specific components
+├── config/           # Configuration files
+│   ├── site.ts       # Site metadata
+│   └── dashboard.ts   # Dashboard configuration
+├── lib/              # Utility functions
+│   ├── actions/      # Server actions
+│   ├── utils/        # Helper utilities
+│   ├── validations/  # Zod schemas
+│   └── db.ts         # Prisma client singleton
+├── prisma/           # Prisma ORM files
+│   ├── schema.prisma # Database schema
+│   ├── migrations/   # Database migrations
+│   └── seed.ts       # Database seed script
+├── public/           # Static assets
+├── styles/           # Global styles
+├── types/            # TypeScript type definitions
+├── .env.example      # Example environment variables
+├── .eslintrc.js      # ESLint configuration
+├── next.config.js    # Next.js configuration
+├── package.json      # Project dependencies
+├── postcss.config.js # PostCSS configuration for Tailwind
+├── tailwind.config.js # Tailwind CSS configuration
+└── tsconfig.json    # TypeScript configuration
 ```
 
-*(Note: This structure is an example. The actual `apps/` or `services/` and `packages/` naming might differ slightly.)*
+### Key Directories Explained
+
+#### `/app` Directory
+
+This is the core of the Next.js App Router architecture. Each folder represents a route segment, and special files define behavior:
+
+* `page.tsx` - Renders a UI at a specific route
+* `layout.tsx` - Defines shared layouts for pages
+* `loading.tsx` - Creates loading UI for segments
+* `error.tsx` - Handles errors within segments
+* `route.ts` - API endpoints (replaces Next.js pages API routes)
+
+Route groups (folders in parentheses like `(auth)`) organize routes without affecting the URL structure.
+
+#### `/components` Directory
+
+Contains all React components, organized by purpose:
+
+* `/ui` - Shadcn UI components and their customizations
+* `/forms` - Form components with React Hook Form and Zod validation
+* `/layouts` - Layout components for page structure
+* Feature-specific folders for domain components
+
+#### `/lib` Directory
+
+Contains utility functions, helpers, and service modules:
+
+* `/actions` - Server Actions for forms and data mutations
+* `/validations` - Zod schemas for data validation
+* `/utils` - Utility functions used throughout the application
+* `db.ts` - Prisma client with connection management
+
+#### `/prisma` Directory
+
+Manages database interactions using Prisma ORM:
+
+* `schema.prisma` - Defines database schema and relationships
+* `/migrations` - Generated SQL migration files
+* `seed.ts` - Script to populate database with initial data
+
+## 4. Environment Setup
+
+This section will guide you through setting up your local development environment for FortressOS.
+
+### 4.1 Cloning the Repository
+
+Start by cloning the repository to your local machine:
+
+```bash
+# Clone the repository
+git clone https://github.com/Olaw2jr/fortressos.git
+
+# Navigate to the project directory
+cd fortressos
+```
+
+### 4.2 Installing Dependencies
+
+Install the project dependencies using your preferred package manager:
+
+```bash
+# Using npm
+npm install
+
+# Using yarn
+yarn install
+
+# Using pnpm
+pnpm install
+```
+
+### 4.3 Environment Variables
+
+FortressOS uses environment variables for configuration. Create a `.env.local` file in the root directory by copying the example:
+
+```bash
+cp .env.example .env.local
+```
+
+Edit the `.env.local` file to set up your local environment variables:
+
+```env
+# Database connection (PostgreSQL)  
+DATABASE_URL="postgresql://postgres:password@localhost:5432/fortressos?schema=public"
+
+# NextAuth configuration
+NEXTAUTH_SECRET="your-nextauth-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Feature flags (if any)
+NEXT_PUBLIC_FEATURE_FLAG_EXAMPLE=true
+```
+
+### 4.4 Database Setup (PostgreSQL)
+
+FortressOS uses PostgreSQL as its database with Prisma ORM for database operations.
+
+#### Using Docker (Recommended)
+
+The easiest way to run PostgreSQL is using Docker:
+
+```bash
+# Start PostgreSQL container
+docker run --name fortressos-db -e POSTGRES_PASSWORD=password -e POSTGRES_USER=postgres -e POSTGRES_DB=fortressos -p 5432:5432 -d postgres:14
+```
+
+Alternatively, if you have a `docker-compose.yml` file in the project, you can use:
+
+```bash
+docker-compose up -d db
+```
+
+#### Using Local PostgreSQL Installation
+
+If you prefer to use a local PostgreSQL installation:
+
+1. Install PostgreSQL on your machine
+2. Create a database for the project: `createdb fortressos`
+3. Update the `DATABASE_URL` in your `.env.local` file accordingly
+
+#### Setup Database Schema
+
+After your PostgreSQL instance is running, set up the database schema using Prisma:
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Run migrations to create database schema
+npx prisma migrate dev
+
+# Seed the database with initial data (if available)
+npx prisma db seed
+```
+
+### 4.5 Running the Development Server
+
+Start the Next.js development server:
+
+```bash
+# Using npm
+npm run dev
+
+# Using yarn
+yarn dev
+
+# Using pnpm
+pnpm dev
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000).
+
+## 5. Development Workflow
+
+This section covers the recommended development workflow for contributing to FortressOS.
+
+### 5.1 Branching Strategy
+
+We follow a simplified Git Flow branching strategy:
+
+* **main**: Production branch. Only merged into from `develop` after thorough testing.
+* **develop**: Primary development branch. Feature branches are created from and merged back into this branch.
+* **feature/\<feature-name\>**: For new features or enhancements.
+* **fix/\<bug-name\>**: For bug fixes.
+* **hotfix/\<hotfix-name\>**: For urgent fixes to production code.
+
+When starting work on a new feature or fix:
+
+```bash
+# Ensure you're on the develop branch and it's up to date
+git checkout develop
+git pull origin develop
+
+# Create a new feature branch
+git checkout -b feature/your-feature-name
+```
+
+### 5.2 Making Changes
+
+As you work on the codebase, follow these best practices:
+
+* Make small, focused commits with clear commit messages
+* Follow the coding standards and conventions (detailed in section 8)
+* Write or update tests as you make changes
+* Run linters and tests locally before pushing
+
+```bash
+# Run linting
+npm run lint
+
+# Run tests
+npm run test
+```
+
+### 5.3 Working with the Next.js App Router
+
+FortressOS uses Next.js with the App Router, which is fundamentally different from the traditional Pages Router.
+
+#### Key Concepts
+
+* **Folder-based routing**: Each folder in the `app` directory represents a route segment
+* **Special files**:
+  * `page.tsx`: UI for a route
+  * `layout.tsx`: Shared UI for a segment and its children
+  * `loading.tsx`: Loading UI
+  * `error.tsx`: Error UI
+  * `route.ts`: API endpoints
+
+#### Route Groups
+
+We use route groups (folders in parentheses like `(auth)`) to organize related routes without affecting the URL structure.
+
+#### Adding New Pages
+
+To add a new page to the application:
+
+1. Determine the route path (e.g., `/dashboard/analytics`)
+2. Create the appropriate directory structure (`app/dashboard/analytics`)
+3. Add a `page.tsx` file with the page content
+
+```tsx
+// app/dashboard/analytics/page.tsx
+export default function AnalyticsPage() {
+  return (
+    <div className="container py-8">
+      <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
+      {/* Page content */}
+    </div>
+  );
+}
+```
+
+### 5.4 Server Components vs. Client Components
+
+Next.js App Router uses React Server Components (RSC) by default. Understanding when to use server vs. client components is crucial:
+
+#### Server Components (Default)
+
+Use for:
+
+* Data fetching
+* Accessing backend resources directly
+* Keeping sensitive data on the server
+* Large dependencies that shouldn't be sent to the client
+
+```tsx
+// A server component (default)
+async function UserProfile({ userId }: { userId: string }) {
+  // This data fetching occurs on the server
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+    </div>
+  );
+}
+```
+
+#### Client Components
+
+Use for:
+
+* Interactivity and event listeners
+* Browser APIs
+* React hooks (useState, useEffect, etc.)
+* Client-side only libraries
+
+To create a client component, add the `"use client"` directive at the top of the file:
+
+```tsx
+"use client";
+
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
+
+### 5.5 API Routes and Server Actions
+
+FortressOS leverages both API Routes and Server Actions for server-side operations.
+
+#### API Routes
+
+For creating REST or GraphQL endpoints, define route handlers in `app/api` directory:
+
+```ts
+// app/api/users/route.ts
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+
+export async function GET() {
+  const users = await prisma.user.findMany();
+  return NextResponse.json(users);
+}
+
+export async function POST(request: Request) {
+  const data = await request.json();
+  const user = await prisma.user.create({ data });
+  return NextResponse.json(user, { status: 201 });
+}
+```
+
+#### Server Actions
+
+For form submissions and data mutations, use Server Actions:
+
+```tsx
+// app/actions/createUser.ts
+'use server';
+
+import { prisma } from '@/lib/db';
+import { userSchema } from '@/lib/validations/user';
+
+export async function createUser(formData: FormData) {
+  const rawData = Object.fromEntries(formData.entries());
+  
+  // Validate with Zod
+  const validatedData = userSchema.parse(rawData);
+  
+  // Create user in database
+  const user = await prisma.user.create({
+    data: validatedData
+  });
+  
+  return { success: true, user };
+}
+```
+
+### 5.6 Submitting Pull Requests
+
+When your changes are ready for review:
+
+1. Push your branch to the remote repository:
+
+```bash
+git push origin feature/your-feature-name
+```
+
+2. Create a pull request from your branch to the `develop` branch
+3. Provide a clear description of your changes
+4. Address any feedback from code reviewers
+5. Once approved, your changes will be merged
+
+## 6. Working with Shadcn UI and Tailwind CSS
+
+FortressOS uses Shadcn UI components built on Tailwind CSS for its user interface.
+
+### 6.1 Shadcn UI Components
+
+Shadcn UI is not a traditional component library but rather a collection of reusable components that you copy into your project.
+
+#### Adding a New Component
+
+To add a Shadcn UI component to the project:
+
+```bash
+npx shadcn-ui@latest add button
+```
+
+This will add the button component to the `components/ui` directory. You can then import and use it in your application:
+
+```tsx
+import { Button } from "@/components/ui/button";
+
+export default function Page() {
+  return (
+    <Button variant="outline">Click me</Button>
+  );
+}
+```
+
+#### Customizing Components
+
+One advantage of Shadcn UI is that you own the components and can customize them as needed. To modify a component:
+
+1. Locate the component in the `components/ui` directory
+2. Edit the component to match your requirements
+3. The changes will be applied throughout the application
+
+### 6.2 Tailwind CSS Usage
+
+FortressOS follows Tailwind CSS best practices for styling:
+
+* Use utility classes directly in JSX for styling
+* Create consistent UI with reusable components
+* Leverage the `tailwind.config.js` file for theme customization
+
+#### Example of Tailwind Usage
+
+```tsx
+<div className="flex items-center space-x-4 rounded-lg bg-white p-4 shadow-md dark:bg-gray-800">
+  <div className="flex-shrink-0">
+    <img className="h-12 w-12 rounded-full" src="/avatar.jpg" alt="User avatar" />
+  </div>
+  <div>
+    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Jane Doe</h3>
+    <p className="text-sm text-gray-500 dark:text-gray-400">Product Manager</p>
+  </div>
+</div>
+```
+
+#### Custom Theme Configuration
+
+The theme is customized in the `tailwind.config.js` file:
+
+```js
+// tailwind.config.js
+module.exports = {
+  darkMode: ["class"],
+  content: ["./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        // Other color definitions...
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+};
+```
 
 ## 4. Environment Setup
 
@@ -127,19 +621,21 @@ yarn install
 
 This command will link the local packages (e.g., shared-types) so they can be imported directly by the frontend and backend.
 
-4.3 Environment Variables
+### 4.3 Environment Variables
+
 Environment variables are crucial for configuring the application.
 
 Root .env (for Docker Compose):
 If a docker-compose.yml at the root manages services like PostgreSQL, it might use variables from a root .env file. Copy .env.example to .env in the root directory and configure it.
 
-Bash
+```Bash
 
 cp .env.example .env
 Backend .env:
 Navigate to the backend app directory (e.g., apps/backend) and copy its example environment file.
+```
 
-Bash
+```Bash
 
 cd apps/backend
 cp .env.example .env
@@ -150,8 +646,9 @@ JWT_SECRET, JWT_EXPIRES_IN
 PORT (e.g., 3001 or 5000)
 Frontend .env.local:
 Navigate to the frontend app directory (e.g., apps/frontend) and copy its example environment file. Next.js uses .env.local for local overrides.
+```
 
-Bash
+```Bash
 
 cd apps/frontend
 cp .env.example .env.local
@@ -160,15 +657,16 @@ Edit apps/frontend/.env.local. Key variables:
 NEXT_PUBLIC_API_URL (e.g., <http://localhost:3001/api> - pointing to your local backend)
 PORT (e.g., 3000 - if different from Next.js default)
 Ensure your .env and .env.local files are added to .gitignore at their respective levels (they usually are by default in .gitignore templates).
+```
 
-4.4 Database Setup (PostgreSQL)
+### 4.4 Database Setup (PostgreSQL)
+
 You can run PostgreSQL using Docker (recommended for ease) or a local installation.
 
 Using Docker (Recommended):
 A docker-compose.yml file might be provided in the root of the project or in the database directory to easily spin up a PostgreSQL instance.
 
-Bash
-
+```Bash
 # From the root directory, if docker-compose.yml includes postgres
 
 docker-compose up -d postgres # Or a specific service name for postgres

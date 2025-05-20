@@ -3,7 +3,12 @@
 **FortressOS is a modern, self-hostable, open-source platform designed to help organizations of all sizes effectively identify, assess, treat, and monitor their IT and cybersecurity risks.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker Build Status](https://img.shields.io/docker/build/Olaw2jr/fortressos.svg?style=flat-square)](https://hub.docker.com/r/Olaw2jr/fortressos/) [![GitHub Issues](https://img.shields.io/github/issues/Olaw2jr/fortressos.svg?style=flat-square)](https://github.com/Olaw2jr/fortressos/issues) [![GitHub Stars](https://img.shields.io/github/stars/Olaw2jr/fortressos.svg?style=flat-square&logo=github)](https://github.com/Olaw2jr/fortressos/stargazers) [![Discord](https://img.shields.io/discord/YOUR_DISCORD_SERVER_ID?label=Join%20Chat&logo=discord&style=flat-square)](https://discord.gg/YOUR_DISCORD_INVITE_CODE) ---
+[![GitHub Issues](https://img.shields.io/github/issues/Olaw2jr/fortressos.svg?style=flat-square)](https://github.com/Olaw2jr/fortressos/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/Olaw2jr/fortressos.svg?style=flat-square&logo=github)](https://github.com/Olaw2jr/fortressos/stargazers)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-007ACC?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker)](https://www.docker.com/)
 
 ## Table of Contents
 
@@ -56,23 +61,30 @@ FortressOS provides a comprehensive suite of tools to manage your risk lifecycle
 - **🔗 Standards-Aligned:** Incorporates principles from leading risk management frameworks (NIST, ISO).
 - **👥 Community-Driven:** Be part of a growing community shaping the future of open-source risk management.
 
-## 🛠️ Tech Stack
+## 💪️ Tech Stack
 
 FortressOS is built with a modern and robust technology stack:
 
-- **Frontend:** [Next.js](https://nextjs.org/), [React](https://reactjs.org/), [shadcn/ui](https://ui.shadcn.com/), [Tailwind CSS](https://tailwindcss.com/), [TypeScript](https://www.typescriptlang.org/)
-- **Backend:** *(To be solidified - e.g., Node.js/NestJS, Python/FastAPI, Go)*
-- **Database:** [PostgreSQL](https://www.postgresql.org/) (Recommended)
-- **API:** RESTful or GraphQL
-- **Containerization:** [Docker](https://www.docker.com/)
+- **Framework:** [Next.js](https://nextjs.org/) with App Router architecture
+- **UI Components:** [shadcn/ui](https://ui.shadcn.com/) - beautifully designed components built with Radix UI and Tailwind CSS
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) for utility-first styling
+- **Language:** [TypeScript](https://www.typescriptlang.org/) for type safety and better developer experience
+- **Database:** [PostgreSQL](https://www.postgresql.org/) with [Prisma ORM](https://www.prisma.io/) for type-safe database access
+- **Validation:** [Zod](https://zod.dev/) for schema validation and type inference
+- **Authentication:** [NextAuth.js](https://next-auth.js.org/) for flexible authentication
+- **State Management:** React Context and hooks for local state, [TanStack Query](https://tanstack.com/query/v4) for server state
+- **Testing:** [Jest](https://jestjs.io/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for unit/component tests, [Playwright](https://playwright.dev/) for E2E testing
+- **Deployment:** [Docker](https://www.docker.com/) for containerization and easy deployment
 
 ## 🏁 Getting Started
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) (version X.X+)
-- [Docker Compose](https://docs.docker.com/compose/install/) (version X.X+)
-- Minimum system resources: (e.g., 2 CPU cores, 4GB RAM - specify based on expected load)
+- [Node.js](https://nodejs.org/) (v18.17.0 or later)
+- [npm](https://www.npmjs.com/), [yarn](https://yarnpkg.com/), or [pnpm](https://pnpm.io/) (package manager)
+- [Docker](https://docs.docker.com/get-docker/) (for containerized deployment and PostgreSQL)
+- [Git](https://git-scm.com/) (for version control)
+- Minimum system resources: 2 CPU cores, 4GB RAM
 
 ### Option 1: Quick Start with Docker (Recommended for Users)
 
@@ -109,57 +121,76 @@ For those who want to contribute to FortressOS development:
 1. **Fork and Clone the repository:**
 
     ```bash
-    git clone [https://github.com/Olaw2jr/fortressos.git](https://github.com/Olaw2jr/fortressos.git)
+    git clone https://github.com/Olaw2jr/fortressos.git
     cd fortressos
     ```
 
-2. **Install Backend Dependencies:**
-    *(Instructions will depend on the chosen backend stack. Example for Node.js):*
+2. **Install Dependencies:**
 
     ```bash
-    cd backend
-    npm install # or yarn install
-    # Setup backend .env file
+    npm install
+    # or
+    yarn install
+    # or
+    pnpm install
     ```
 
-3. **Install Frontend Dependencies:**
+3. **Set up environment variables:**
+
+   Create a `.env.local` file in the root directory:
 
     ```bash
-    cd frontend # or ./
-    npm install # or yarn install
-    # Setup frontend .env file (e.g., for API endpoints)
+    cp .env.example .env.local
     ```
 
-4. **Setup Database:**
-    Ensure you have a running PostgreSQL instance. Create a database and user for FortressOS, then update your backend `.env` file with the connection details.
-    *(Optionally, provide a script to set up the dev database)*
+   Update the environment variables, particularly the database connection:
 
-5. **Run Migrations & Seed Data (if applicable):**
-    *(Example for a Node.js backend with a migration tool):*
-
-    ```bash
-    cd backend
-    npm run db:migrate
-    npm run db:seed # Optional
+    ```env
+    # Database connection
+    DATABASE_URL="postgresql://postgres:password@localhost:5432/fortressos?schema=public"
+    
+    # NextAuth.js configuration
+    NEXTAUTH_SECRET="your-secret-key"
+    NEXTAUTH_URL="http://localhost:3000"
     ```
 
-6. **Start Backend Development Server:**
-    *(Example for Node.js):*
+4. **Setup PostgreSQL Database:**
+
+   Option A: Using Docker (recommended):
 
     ```bash
-    cd backend
+    # Start a PostgreSQL container
+    docker run --name fortressos-db -e POSTGRES_PASSWORD=password -e POSTGRES_USER=postgres -e POSTGRES_DB=fortressos -p 5432:5432 -d postgres:14
+    ```
+
+   Option B: Use an existing PostgreSQL installation and create a database named `fortressos`.
+
+5. **Set up the database schema with Prisma:**
+
+    ```bash
+    # Generate Prisma client
+    npx prisma generate
+    
+    # Run database migrations
+    npx prisma migrate dev
+    
+    # Seed the database (if available)
+    npx prisma db seed
+    ```
+
+6. **Start the development server:**
+
+    ```bash
     npm run dev
+    # or
+    yarn dev
+    # or
+    pnpm dev
     ```
 
-7. **Start Frontend Development Server:**
+7. **Access FortressOS:**
 
-    ```bash
-    cd frontend # or ./
-    npm run dev
-    ```
-
-8. **Access FortressOS:**
-    Open your web browser and navigate to `http://localhost:3000` (or the port specified by the Next.js dev server).
+   Open your web browser and navigate to `http://localhost:3000`
 
 *For more detailed development setup instructions, please see `DEVELOPMENT_GUIDE.md` (link to a future, more detailed guide).*
 
@@ -186,18 +217,46 @@ FortressOS is an open-source project, and we welcome contributions from the comm
 
 - 🌟 **Star the project** on GitHub!
 - 🐛 **Report bugs** or suggest features by creating an issue.
-- 📝 **Improve documentation** (Readme, user guides, developer docs).
-- 💻 **Contribute code:** Fix bugs, implement new features, or refactor existing code.
-- 🎨 **UI/UX improvements:** Help make FortressOS even more user-friendly.
+- 📝 **Improve documentation** (README, user guides, developer docs).
+- 💻 **Contribute code:**
+  - Help with Next.js App Router implementation
+  - Create or improve Shadcn UI components
+  - Optimize Tailwind CSS usage
+  - Enhance Prisma schema and database operations
+  - Implement robust data validation with Zod
+  - Improve testing coverage
+- 🎨 **UI/UX improvements:** Help make FortressOS even more user-friendly with modern component patterns.
+- 🧪 **Testing:** Write unit, integration, or end-to-end tests.
 - 🌐 **Translations:** Help make FortressOS accessible in more languages.
 
-Please read our [**CONTRIBUTING.md**](CONTRIBUTING.md) (link to your contributing guidelines) for details on our code of conduct, development process, and how to submit pull requests.
+We follow modern development best practices:
 
-## 🗺️ Roadmap
+- **TypeScript** for type safety
+- **Component-driven architecture** with Shadcn UI
+- **Responsive design** with Tailwind CSS
+- **Type-safe database access** with Prisma ORM
+- **Schema validation** with Zod
+- **Git workflow** with feature branches and pull requests
+- **Automated testing** with Jest and React Testing Library
+
+Please read our [**CONTRIBUTING.md**](CONTRIBUTING.md) for details on our code of conduct, development process, and how to submit pull requests. For technical details about the development environment setup and workflow, see [**DEVELOPMENT_GUIDE.md**](DEVELOPMENT_GUIDE.md).
+
+## 🗯️ Roadmap
 
 We have an exciting vision for FortressOS! Here's a glimpse of what we're planning (subject to change based on community feedback):
 
-- **v1.0:** Core Risk Management (Assets, Threats, Vulns, Qualitative/Quantitative Assessment, Basic Controls, Risk Register, Docker deployment).
+- **v1.0:** Core Risk Management
+  - Modern Next.js App Router architecture
+  - Responsive UI with Shadcn UI components and Tailwind CSS
+  - Type-safe database operations with Prisma ORM
+  - Schema validation with Zod
+  - Asset management module
+  - Threat and vulnerability tracking
+  - Qualitative and quantitative risk assessment
+  - Basic control management
+  - Risk register dashboard
+  - Docker deployment
+  - Comprehensive test suite
 
 - **Post-v1.0:**
   - Enhanced Compliance Management Modules (ISO 27001, PCI DSS, etc.).
@@ -229,3 +288,30 @@ FortressOS is released under the [MIT License](LICENSE.md).
 ---
 
 **Help us build the future of open-source risk management!**
+
+## Additional Resources
+
+### Official Documentation
+
+- [Next.js App Router Documentation](https://nextjs.org/docs/app)
+- [Shadcn UI Components](https://ui.shadcn.com/docs/components)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Prisma ORM Documentation](https://www.prisma.io/docs)
+- [Zod Schema Validation](https://zod.dev/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+- [NextAuth.js Authentication](https://next-auth.js.org/getting-started/introduction)
+- [TanStack Query (React Query)](https://tanstack.com/query/latest/docs/react/overview)
+
+### Development Best Practices
+
+- [Next.js Best Practices](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#good-to-know)
+- [React Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+- [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+- [Automated Testing Best Practices](https://testing-library.com/docs/react-testing-library/intro)
+- [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow)
+
+### Community Resources
+
+- [Next.js Discord](https://discord.com/invite/nextjs)
+- [Prisma Discord](https://discord.com/invite/prisma)
+- [Tailwind CSS Discord](https://discord.com/invite/tailwindcss)
