@@ -3,7 +3,7 @@
 **FortressOS is a modern, self-hostable, open-source platform designed to help organizations of all sizes effectively identify, assess, treat, and monitor their IT and cybersecurity risks.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker Build Status](https://img.shields.io/docker/build/yourusername/fortressos.svg?style=flat-square)](https://hub.docker.com/r/yourusername/fortressos/) [![GitHub Issues](https://img.shields.io/github/issues/yourusername/fortressos.svg?style=flat-square)](https://github.com/yourusername/fortressos/issues) [![GitHub Stars](https://img.shields.io/github/stars/yourusername/fortressos.svg?style=flat-square&logo=github)](https://github.com/yourusername/fortressos/stargazers) [![Discord](https://img.shields.io/discord/YOUR_DISCORD_SERVER_ID?label=Join%20Chat&logo=discord&style=flat-square)](https://discord.gg/YOUR_DISCORD_INVITE_CODE) ---
+[![Docker Build Status](https://img.shields.io/docker/build/Olaw2jr/fortressos.svg?style=flat-square)](https://hub.docker.com/r/Olaw2jr/fortressos/) [![GitHub Issues](https://img.shields.io/github/issues/Olaw2jr/fortressos.svg?style=flat-square)](https://github.com/Olaw2jr/fortressos/issues) [![GitHub Stars](https://img.shields.io/github/stars/Olaw2jr/fortressos.svg?style=flat-square&logo=github)](https://github.com/Olaw2jr/fortressos/stargazers) [![Discord](https://img.shields.io/discord/YOUR_DISCORD_SERVER_ID?label=Join%20Chat&logo=discord&style=flat-square)](https://discord.gg/YOUR_DISCORD_INVITE_CODE) ---
 
 ## Table of Contents
 
@@ -81,7 +81,7 @@ This is the easiest way to get FortressOS up and running.
 1. **Clone the repository:**
 
     ```bash
-    git clone [https://github.com/yourusername/fortressos.git](https://github.com/yourusername/fortressos.git)
+    git clone [https://github.com/Olaw2jr/fortressos.git](https://github.com/Olaw2jr/fortressos.git)
     cd fortressos
     ```
 
@@ -109,7 +109,7 @@ For those who want to contribute to FortressOS development:
 1. **Fork and Clone the repository:**
 
     ```bash
-    git clone [https://github.com/YOUR_GITHUB_USERNAME/fortressos.git](https://github.com/YOUR_GITHUB_USERNAME/fortressos.git)
+    git clone [https://github.com/Olaw2jr/fortressos.git](https://github.com/Olaw2jr/fortressos.git)
     cd fortressos
     ```
 
