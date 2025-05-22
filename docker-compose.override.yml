@@ -1,0 +1,7 @@
+# docker-compose.override.yml for development
+services:
+  fortressos:
+    volumes:
+      - ./src:/app/src
+    environment:
+      - NODE_ENV=development
