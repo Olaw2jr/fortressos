@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { z } from "zod";
 
 import { verifyEmail } from "@/auth/auth-actions";
 
@@ -17,7 +16,7 @@ export function VerifyEmailForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const email = searchParams.get("email");
-  
+
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const [isPending, setIsPending] = useState(false);
@@ -26,7 +25,7 @@ export function VerifyEmailForm() {
   // Verify token automatically if present
   const verifyToken = useCallback(async () => {
     if (!token) return;
-    
+
     setError("");
     setSuccess("");
     setIsPending(true);
@@ -82,7 +81,7 @@ export function VerifyEmailForm() {
           <p className="text-sm text-muted-foreground text-center">
             Please try again or contact support if you continue to have problems.
           </p>
-          <Button 
+          <Button
             onClick={() => router.push("/auth/login")}
             className="w-full"
           >
@@ -103,7 +102,7 @@ export function VerifyEmailForm() {
           <p className="text-sm text-muted-foreground text-center">
             Your email has been verified successfully. You can now sign in to your account.
           </p>
-          <Button 
+          <Button
             onClick={() => router.push("/auth/login")}
             className="w-full"
           >
@@ -122,15 +121,15 @@ export function VerifyEmailForm() {
         <h3 className="text-xl font-semibold">Check your email</h3>
         <p className="text-sm text-muted-foreground text-center">
           {email ? (
-            <>We've sent a verification link to <span className="font-medium">{email}</span>.</>
+            <>We&apos;ve sent a verification link to <span className="font-medium">{email}</span>.</>
           ) : (
-            <>We've sent a verification link to your email address.</>
+            <>We&apos;ve sent a verification link to your email address.</>
           )}
         </p>
         <p className="text-sm text-muted-foreground text-center">
           Click the link in the email to verify your account.
         </p>
-        <Button 
+        <Button
           variant="outline"
           onClick={() => router.push("/auth/login")}
           className="w-full"

@@ -21,7 +21,7 @@ COPY prisma ./prisma/
 # Install all dependencies (including devDependencies for build and Prisma client generation)
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile --production=false; \
-  elif [ -f package-lock.json ]; then npm ci --include=dev; \
+  elif [ -f package-lock.json ]; then npm install; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm install --frozen-lockfile --prod=false; \
   else echo "Lockfile not found. Please commit a lockfile." && exit 1; \
   fi
@@ -40,16 +40,17 @@ WORKDIR /app
 # Copy dependencies (with generated Prisma client) from previous stage
 COPY --from=prisma_generate /app/node_modules ./node_modules
 COPY --from=prisma_generate /app/prisma ./prisma/
+COPY --from=deps /app/package.json ./
 
 # Copy application source code and necessary configuration files
 # Ensure .dockerignore is properly configured to exclude unnecessary files
 COPY public ./public/
 # Assuming 'src' directory structure
 COPY src ./src/
-COPY next.config.mjstsconfig.json* ./
+COPY next.config.ts tsconfig.json ./
 
 # Set build-time ENV for Next.js telemetry (optional)
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the Next.js application (Prisma client generation should ideally be a prebuild step)
 # If "prisma generate" is not in prebuild, ensure it's run before this.
@@ -86,7 +87,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 # Copy and set permissions for the startup script
-COPY --chown=nextjs:nodejs start.sh /app/start.sh
+COPY --chown=nextjs:nodejs docker/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 USER nextjs

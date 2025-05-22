@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -10,7 +9,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     <div className="flex h-screen min-h-full flex-1">
       {/* Left side with background image/gradient */}
       <div className="relative hidden w-1/2 flex-1 lg:block">
-        <div 
+        <div
           className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-500"
           aria-hidden="true"
         />

@@ -1,0 +1,62 @@
+services:
+  fortressos:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile # Using the more specific Dockerfile path
+      args: # Optional: Pass build arguments to Dockerfile
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    image: fortressos_app # Tagging the built image
+    container_name: fortressos_app_container # Clear container name
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-appdb}?schema=public"
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET}" # Essential for NextAuth
+      NEXTAUTH_URL: "${NEXTAUTH_URL:-http://localhost:3000}" # Default for NextAuth
+      # Add any other environment variables your Next.js app needs
+      # NEXT_PUBLIC_SOME_KEY: "some_value"
+    # Command to run migrations then start the application
+    # In standalone mode, we need to directly run the server.js file
+    command: sh -c "npx prisma migrate deploy && node server.js"
+    depends_on:
+      db:
+        condition: service_healthy # Ensures 'db' is healthy before 'app' starts
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"] # App healthcheck
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - fortressos_network
+
+  db:
+    image: postgres:15-alpine # Consistent and stable Postgres version
+    container_name: fortressos_db_container # Clear container name
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user} # Default to 'user' if not set in .env
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password} # Default to 'password'
+      POSTGRES_DB: ${POSTGRES_DB:-appdb} # Default to 'appdb'
+    ports:
+      - "5432:5432" # Optional: for external access to the DB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist database data
+    restart: unless-stopped
+    healthcheck:
+      # Test command now uses environment variables for user and db
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-appdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - fortressos_network
+
+volumes:
+  postgres_data: # Defines a named volume for data persistence
+
+networks:
+  fortressos_network: # Defines a custom bridge network
+    driver: bridge

@@ -119,11 +119,12 @@ export async function generateMagicLinkToken(email: string) {
  * @param email - The user's email for labeling
  * @returns The secret and QR code URL
  */
-export function generateTwoFactorSecret(email: string) {
+export async function generateTwoFactorSecret(email: string) {
   const secret = speakeasy.generateSecret({
     name: `FortressOS:${email}`
   });
   
+  // toDataURL returns a Promise that resolves to the QR code data URL
   const qrCodeUrl = qrcode.toDataURL(secret.otpauth_url);
   
   return {

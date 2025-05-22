@@ -26,7 +26,7 @@ export const RegisterSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   confirmPassword: z.string()
-}).refine(data => data.password === data.confirmPassword, {
+}).refine(async data => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"]
 });
@@ -44,7 +44,7 @@ export const ResetPasswordSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   confirmPassword: z.string()
-}).refine(data => data.password === data.confirmPassword, {
+}).refine(async data => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"]
 });
@@ -393,7 +393,7 @@ export async function setupTwoFactor(userId: string) {
     }
 
     // Generate 2FA secret
-    const { secret, qrCodeUrl } = generateTwoFactorSecret(user.email);
+    const { secret, qrCodeUrl } = await generateTwoFactorSecret(user.email);
     
     // Update user with secret but don't enable 2FA yet
     await db.user.update({

@@ -66,7 +66,8 @@ export function LoginForm() {
       if (result?.twoFactor) {
         setShowTwoFactor(true);
       }
-    } catch (error) {
+    } catch (err) {
+      console.error("Authentication error:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsPending(false);
@@ -98,7 +99,8 @@ export function LoginForm() {
         setIsMagicLinkSent(true);
         setMagicLinkEmail(email);
       }
-    } catch (error) {
+    } catch (err) {
+      console.error("Authentication error:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsPending(false);
@@ -111,7 +113,6 @@ export function LoginForm() {
       headerDescription="Welcome back to FortressOS"
       backButtonLabel="Don't have an account?"
       backButtonHref="/auth/register"
-      showSocial
     >
       {isMagicLinkSent ? (
         <div className="space-y-4 text-center">
@@ -120,7 +121,7 @@ export function LoginForm() {
           </div>
           <h3 className="text-xl font-semibold">Check your email</h3>
           <p className="text-sm text-muted-foreground">
-            We've sent a magic link to <span className="font-medium">{magicLinkEmail}</span>.
+            We&apos;ve sent a magic link to <span className="font-medium">{magicLinkEmail}</span>.
             Click the link in the email to sign in to your account.
           </p>
           <Button
@@ -223,7 +224,7 @@ export function LoginForm() {
             )}
 
             {success && (
-              <Alert variant="success">
+              <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
                 <AlertCircle className="w-4 h-4" />
                 <AlertDescription>{success}</AlertDescription>
               </Alert>
@@ -247,7 +248,7 @@ export function LoginForm() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="px-2 bg-background text-muted-foreground">
-            Or continue with
+            Or continue with magic link
           </span>
         </div>
       </div>

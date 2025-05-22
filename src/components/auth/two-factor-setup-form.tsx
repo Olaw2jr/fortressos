@@ -33,7 +33,7 @@ const TwoFactorSchema = z.object({
 export function TwoFactorSetupForm() {
   const router = useRouter();
   const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
+  const [successMessage, setSuccess] = useState<string | undefined>();
   const [isPending, setIsPending] = useState(false);
   const [isPending2, startTransition] = useTransition();
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -69,7 +69,9 @@ export function TwoFactorSetupForm() {
       }
 
       if (result?.success && result.qrCodeUrl) {
-        setQrCode(result.qrCodeUrl);
+        // Await the qrCodeUrl promise before setting it to state
+        const qrCodeData = await result.qrCodeUrl;
+        setQrCode(qrCodeData);
         setSuccess(result.success);
       }
     } catch (error) {
@@ -193,6 +195,13 @@ export function TwoFactorSetupForm() {
                 </Alert>
               )}
 
+              {successMessage && (
+                <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
+                  <Check className="w-4 h-4" />
+                  <AlertDescription>{successMessage}</AlertDescription>
+                </Alert>
+              )}
+
               <Button
                 type="submit"
                 className="w-full"
@@ -208,7 +217,7 @@ export function TwoFactorSetupForm() {
 
       {backupCodes && (
         <div className="space-y-6">
-          <Alert variant="success">
+          <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
             <Check className="w-4 h-4" />
             <AlertDescription>Two-factor authentication enabled successfully!</AlertDescription>
           </Alert>
