@@ -10,6 +10,23 @@ import {
   GalleryVerticalEnd,
   Settings2,
   SquareTerminal,
+  History,
+  FileWarning,
+  Shield,
+  LayoutDashboard,
+  ClipboardList,
+  Target,
+  AlertTriangle,
+  Database,
+  BadgeCheck,
+  CreditCard,
+  CircuitBoard,
+  LockKeyhole,
+  Bell,
+  PaintBucket,
+  UserCog,
+  Hospital,
+  Landmark,
 } from "lucide-react"
 
 import { SidebarMain } from "@/components/dashboard/sidebar-main"
@@ -44,64 +61,86 @@ const data = {
   ],
   navMain: [
     {
-      title: "Playground",
+      title: "Overview",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
+          title: "Dashboard",
+          url: "#",
+          icon: LayoutDashboard,
+        },
+        {
           title: "History",
           url: "#",
+          icon: History,
         },
         {
-          title: "Starred",
+          title: "Reports",
           url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
+          icon: ClipboardList,
         },
       ],
     },
     {
-      title: "Models",
+      title: "Analysis",
       url: "#",
       icon: Bot,
+      isActive: true,
       items: [
         {
-          title: "Genesis",
+          title: "Assessments",
           url: "#",
+          icon: Target,
         },
         {
-          title: "Explorer",
+          title: "Threats",
           url: "#",
+          icon: AlertTriangle,
         },
         {
-          title: "Quantum",
+          title: "Vulnerabilities",
           url: "#",
+          icon: FileWarning,
+        },
+        {
+          title: "Assets",
+          url: "#",
+          icon: Database,
         },
       ],
     },
     {
-      title: "Documentation",
+      title: "Frameworks",
       url: "#",
       icon: BookOpen,
+      isActive: true,
       items: [
         {
-          title: "Introduction",
+          title: "NIST SP 800-53",
           url: "#",
+          icon: Shield,
         },
         {
-          title: "Get Started",
+          title: "ISO 27001",
           url: "#",
+          icon: BadgeCheck,
         },
         {
-          title: "Tutorials",
+          title: "CIS Controls",
           url: "#",
+          icon: CircuitBoard,
         },
         {
-          title: "Changelog",
+          title: "PCI DSS",
           url: "#",
+          icon: Landmark,
+        },
+        {
+          title: "HIPAA",
+          url: "#",
+          icon: Hospital,
         },
       ],
     },
@@ -109,26 +148,32 @@ const data = {
       title: "Settings",
       url: "#",
       icon: Settings2,
+      isActive: true,
       items: [
         {
           title: "Account",
           url: "/account",
+          icon: UserCog,
         },
         {
           title: "Appearance",
           url: "/appearance",
+          icon: PaintBucket,
         },
         {
           title: "Notifications",
           url: "/notifications",
+          icon: Bell,
         },
         {
           title: "Security",
           url: "/security",
+          icon: LockKeyhole,
         },
         {
           title: "Billing",
-          url: "#",
+          url: "/billing",
+          icon: CreditCard,
         },
       ],
     },
@@ -150,7 +195,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         // Dynamically import to avoid SSR issues
         const { getSession } = await import('next-auth/react');
         const session = await getSession();
-        
+
         if (session?.user) {
           setUserData({
             name: session.user.name || "User",
