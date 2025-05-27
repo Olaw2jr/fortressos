@@ -2,30 +2,20 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { LoginForm } from '@/components/auth/login-form';
-import { login, sendMagicLink } from '@/auth/auth-actions';
-import { vi } from 'vitest';
-import { expect } from '@playwright/test';
+import { login, sendMagicLink } from '@/lib/auth/auth-actions';
+// Using Jest for testing
+import '@testing-library/jest-dom';
 
-// Mock dependencies
-vi.mock('@/auth/auth-actions', () => ({
-  login: vi.fn(),
-  sendMagicLink: vi.fn()
-}));
-
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn()
-  })
-}));
+// Note: The global mocks from tests/setup.ts are used instead of defining mocks here
 
 describe('LoginForm Integration Tests', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should submit the form with valid credentials', async () => {
     // Mock successful login
-    vi.mocked(login).mockResolvedValueOnce({ success: 'Logged in successfully!' });
+    (login as jest.Mock).mockResolvedValueOnce({ success: 'Logged in successfully!' });
 
     // Render the component
     render(<LoginForm />);
@@ -59,7 +49,7 @@ describe('LoginForm Integration Tests', () => {
 
   it('should show error message on login failure', async () => {
     // Mock failed login
-    vi.mocked(login).mockResolvedValueOnce({ error: 'Invalid credentials' });
+    (login as jest.Mock).mockResolvedValueOnce({ error: 'Invalid credentials' });
 
     // Render the component
     render(<LoginForm />);
@@ -84,7 +74,7 @@ describe('LoginForm Integration Tests', () => {
 
   it('should show two-factor authentication input when required', async () => {
     // Mock 2FA challenge
-    vi.mocked(login).mockResolvedValueOnce({ twoFactor: true });
+    (login as jest.Mock).mockResolvedValueOnce({ twoFactor: true });
 
     // Render the component
     render(<LoginForm />);
@@ -107,7 +97,7 @@ describe('LoginForm Integration Tests', () => {
     });
 
     // Now submit with a 2FA code
-    vi.mocked(login).mockResolvedValueOnce({ success: 'Logged in successfully!' });
+    (login as jest.Mock).mockResolvedValueOnce({ success: 'Logged in successfully!' });
 
     fireEvent.change(screen.getByLabelText(/two-factor authentication code/i), {
       target: { value: '123456' }
@@ -123,7 +113,7 @@ describe('LoginForm Integration Tests', () => {
 
   it('should send magic link when requested', async () => {
     // Mock magic link success
-    vi.mocked(sendMagicLink).mockResolvedValueOnce({ success: 'Magic link sent if account exists!' });
+    (sendMagicLink as jest.Mock).mockResolvedValueOnce({ success: 'Magic link sent if account exists!' });
 
     // Render the component
     render(<LoginForm />);
