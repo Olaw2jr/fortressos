@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import * as React from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { messages } from './messages';
 
 // Define supported languages
@@ -36,13 +37,18 @@ export function LanguageProvider({
   defaultLanguage = 'en'
 }: LanguageProviderProps) {
   const [language, setLanguage] = useState<Language>(defaultLanguage);
-  const availableLanguages: Language[] = ['en', 'es'];
+  
+  // Memoize the array so it doesn't change on every render
+  const availableLanguages = useMemo<Language[]>(() => [
+    'en', 
+    'es'
+  ], []);
 
-  // Load user preference from localStorage on component mount
+  // Initialize language from storage or browser preference
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('language') as Language;
-    if (savedLanguage && availableLanguages.includes(savedLanguage)) {
-      setLanguage(savedLanguage);
+    const storedLang = localStorage.getItem('language') as Language;
+    if (storedLang && availableLanguages.includes(storedLang)) {
+      setLanguage(storedLang);
     } else {
       // Check browser language
       const browserLang = navigator.language.split('-')[0] as Language;
@@ -50,7 +56,7 @@ export function LanguageProvider({
         setLanguage(browserLang);
       }
     }
-  }, []);
+  }, [availableLanguages]);
 
   // Save language preference when it changes
   useEffect(() => {

@@ -29,6 +29,19 @@ model User {
   failedLoginAttempts   Int       @default(0)
   lockedUntil           DateTime?
   lastLogin             DateTime?
+  
+  // Appearance settings
+  theme                 String?   @default("light") // light or dark
+  font                  String?   @default("inter") // inter, manrope, or system
+  
+  // Notification settings
+  notificationType      String?   @default("all") // all, mentions, or none
+  mobilePushEnabled     Boolean?  @default(false)
+  communicationEmails   Boolean?  @default(false)
+  marketingEmails       Boolean?  @default(false)
+  socialEmails          Boolean?  @default(true)
+  securityEmails        Boolean?  @default(true)
+  
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   authLogs              AuthLog[]

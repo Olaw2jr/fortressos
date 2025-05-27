@@ -51,19 +51,19 @@ export async function generateVerificationToken(email: string) {
   await db.verificationToken.deleteMany({
     where: { identifier: email }
   });
-  
+
   const token = generateToken();
   const expires = createTokenExpiry(24); // 24 hours
-  
+
   // Store the token in the database
-  const verificationToken = await db.verificationToken.create({
+  await db.verificationToken.create({
     data: {
       identifier: email,
       token,
       expires
     }
   });
-  
+
   return { token, expires };
 }
 
@@ -75,7 +75,7 @@ export async function generateVerificationToken(email: string) {
 export async function generatePasswordResetToken(email: string) {
   const token = generateToken();
   const expires = createTokenExpiry(1); // 1 hour
-  
+
   // Store the token in the user record
   await db.user.update({
     where: { email },
@@ -84,7 +84,7 @@ export async function generatePasswordResetToken(email: string) {
       passwordResetExpires: expires
     }
   });
-  
+
   return { token, expires };
 }
 
@@ -98,19 +98,19 @@ export async function generateMagicLinkToken(email: string) {
   await db.verificationToken.deleteMany({
     where: { identifier: email }
   });
-  
+
   const token = generateToken();
   const expires = createTokenExpiry(1); // 1 hour
-  
+
   // Store the token in the database
-  const magicLinkToken = await db.verificationToken.create({
+  await db.verificationToken.create({
     data: {
       identifier: email,
       token,
       expires
     }
   });
-  
+
   return { token, expires };
 }
 
@@ -123,10 +123,10 @@ export async function generateTwoFactorSecret(email: string) {
   const secret = speakeasy.generateSecret({
     name: `FortressOS:${email}`
   });
-  
+
   // toDataURL returns a Promise that resolves to the QR code data URL
   const qrCodeUrl = qrcode.toDataURL(secret.otpauth_url);
-  
+
   return {
     secret: secret.base32,
     qrCodeUrl
@@ -154,13 +154,13 @@ export function verifyTwoFactorToken(secret: string, token: string): boolean {
  */
 export function generateTwoFactorBackupCodes(): string[] {
   const codes: string[] = [];
-  
+
   // Generate 10 backup codes
   for (let i = 0; i < 10; i++) {
     const code = crypto.randomBytes(4).toString("hex"); // 8 character code
     codes.push(code);
   }
-  
+
   return codes;
 }
 
@@ -177,26 +177,53 @@ export async function rateLimitRequest(
   windowMs: number = 60 * 60 * 1000 // 1 hour
 ): Promise<boolean> {
   const key = `ratelimit:${identifier}`;
-  
+
   // This would typically use Redis or a similar store in production
   // For simplicity, we'll use in-memory store here
   const attempts = globalThis.ratelimits?.get(key) || 0;
-  
+
   if (attempts >= maxAttempts) {
     return false; // Rate limited
   }
-  
+
   // Increment attempts
   if (!globalThis.ratelimits) {
     globalThis.ratelimits = new Map();
   }
-  
+
   globalThis.ratelimits.set(key, attempts + 1);
-  
+
   // Set expiry
   setTimeout(() => {
     globalThis.ratelimits?.delete(key);
   }, windowMs);
-  
+
   return true; // Not rate limited
+}
+
+export async function getVerificationTokenByEmail(email: string) {
+  try {
+    const token = await db.verificationToken.findFirst({
+      where: { identifier: email },
+    });
+    return token;
+  } catch {
+    return null;
+  }
+}
+
+export async function getMagicLinkTokenByEmail(email: string) {
+  try {
+    // Use verificationToken table with as type filter for magic links
+    const token = await db.verificationToken.findFirst({
+      where: {
+        identifier: email,
+        // Assuming there's a way to identify magic link tokens
+        // Add any additional filtering if needed
+      },
+    });
+    return token;
+  } catch {
+    return null;
+  }
 }

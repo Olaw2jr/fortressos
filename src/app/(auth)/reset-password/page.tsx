@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { PasswordResetForm } from "@/components/auth/password-reset-form";
-import { auth } from "@/auth/auth-config";
+import { auth } from "@/lib/auth/auth-config";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {

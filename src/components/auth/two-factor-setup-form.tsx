@@ -8,8 +8,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { setupTwoFactor, enableTwoFactor } from "@/auth/auth-actions";
-import { auth } from "@/auth/auth-config";
+import { setupTwoFactor, enableTwoFactor } from "@/lib/auth/auth-actions";
+import { auth } from "@/lib/auth/auth-config";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { CardWrapper } from "@/components/auth/card-wrapper";
-import { AlertCircle, Loader2, Copy, Check } from "lucide-react";
+import { Loader2, Copy, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Schema for the verification code
@@ -32,7 +32,6 @@ const TwoFactorSchema = z.object({
 
 export function TwoFactorSetupForm() {
   const router = useRouter();
-  const [error, setError] = useState<string | undefined>();
   const [successMessage, setSuccess] = useState<string | undefined>();
   const [isPending, setIsPending] = useState(false);
   const [isPending2, startTransition] = useTransition();
@@ -50,7 +49,6 @@ export function TwoFactorSetupForm() {
 
   // Initialize 2FA setup
   const initSetup = async () => {
-    setError("");
     setSuccess("");
     setIsPending(true);
 
@@ -58,14 +56,15 @@ export function TwoFactorSetupForm() {
       const session = await auth();
       
       if (!session?.user?.id) {
-        router.push("/auth/login");
+        router.push("/login");
         return;
       }
 
       const result = await setupTwoFactor(session.user.id);
 
       if (result?.error) {
-        setError(result.error);
+        setIsPending(false);
+        return;
       }
 
       if (result?.success && result.qrCodeUrl) {
@@ -74,8 +73,8 @@ export function TwoFactorSetupForm() {
         setQrCode(qrCodeData);
         setSuccess(result.success);
       }
-    } catch (error) {
-      setError("An unexpected error occurred");
+    } catch {
+      setIsPending(false);
     } finally {
       setIsPending(false);
     }
@@ -83,7 +82,6 @@ export function TwoFactorSetupForm() {
 
   // Handle form submission to verify and enable 2FA
   const onSubmit = async (values: z.infer<typeof TwoFactorSchema>) => {
-    setError("");
     setSuccess("");
     setIsPending(true);
 
@@ -91,14 +89,15 @@ export function TwoFactorSetupForm() {
       const session = await auth();
       
       if (!session?.user?.id) {
-        router.push("/auth/login");
+        router.push("/login");
         return;
       }
 
       const result = await enableTwoFactor(session.user.id, values.code);
 
       if (result?.error) {
-        setError(result.error);
+        setIsPending(false);
+        return;
       }
 
       if (result?.success && result.backupCodes) {
@@ -106,8 +105,8 @@ export function TwoFactorSetupForm() {
         setSuccess(result.success);
         form.reset();
       }
-    } catch (error) {
-      setError("An unexpected error occurred");
+    } catch {
+      setIsPending(false);
     } finally {
       setIsPending(false);
     }
@@ -187,13 +186,6 @@ export function TwoFactorSetupForm() {
                   </FormItem>
                 )}
               />
-
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="w-4 h-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
 
               {successMessage && (
                 <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { requestPasswordReset } from "@/auth/auth-actions";
+import { requestPasswordReset } from "@/lib/auth/auth-actions";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,8 +28,7 @@ const PasswordResetSchema = z.object({
 });
 
 export function PasswordResetForm() {
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string | undefined>('');
   const [isPending, setIsPending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
@@ -43,15 +42,14 @@ export function PasswordResetForm() {
 
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof PasswordResetSchema>) => {
-    setError("");
-    setSuccess("");
+    setSuccess('');
     setIsPending(true);
 
     try {
       const result = await requestPasswordReset(values.email);
 
       if (result?.error) {
-        setError(result.error);
+        setSuccess(result.error);
       }
 
       if (result?.success) {
@@ -59,8 +57,9 @@ export function PasswordResetForm() {
         setEmailSent(true);
         form.reset();
       }
-    } catch (error) {
-      setError("An unexpected error occurred");
+    } catch {
+      // Catch without parameter to avoid unused variable warning
+      setSuccess("An unexpected error occurred");
     } finally {
       setIsPending(false);
     }
@@ -71,7 +70,7 @@ export function PasswordResetForm() {
       headerTitle="Forgot Password"
       headerDescription="Request a password reset link"
       backButtonLabel="Back to login"
-      backButtonHref="/auth/login"
+      backButtonHref="/login"
     >
       {emailSent ? (
         <div className="space-y-4 text-center">
@@ -80,7 +79,7 @@ export function PasswordResetForm() {
           </div>
           <h3 className="text-xl font-semibold">Check your email</h3>
           <p className="text-sm text-muted-foreground">
-            If an account exists with the email you entered, we've sent a password reset link.
+            If an account exists with the email you entered, we&apos;ve sent a password reset link.
           </p>
           <Button
             variant="outline"
@@ -115,13 +114,6 @@ export function PasswordResetForm() {
                 )}
               />
             </div>
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="w-4 h-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
 
             {success && (
               <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">

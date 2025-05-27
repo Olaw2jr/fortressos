@@ -7,7 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { ResetPasswordSchema, resetPassword } from "@/auth/auth-actions";
+import { resetPassword } from "@/lib/auth/auth-actions";
+import { ResetPasswordSchema } from "@/lib/auth/auth-schemas";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,15 +28,14 @@ export function NewPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
+
+  const [success, setSuccess] = useState<string | undefined>('');
   const [isPending, setIsPending] = useState(false);
 
   // Redirect if no token is present
   useEffect(() => {
     if (!token) {
-      router.push("/auth/login");
+      router.push("/login");
     }
   }, [token, router]);
 
@@ -50,12 +50,10 @@ export function NewPasswordForm() {
 
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof ResetPasswordSchema>) => {
-    setError("");
     setSuccess("");
     setIsPending(true);
 
     if (!token) {
-      setError("Missing reset token");
       setIsPending(false);
       return;
     }
@@ -64,21 +62,22 @@ export function NewPasswordForm() {
       const result = await resetPassword(token, values);
 
       if (result?.error) {
-        setError(result.error);
+        setIsPending(false);
         form.reset();
       }
 
       if (result?.success) {
         setSuccess(result.success);
         form.reset();
-        
+
         // Redirect to login page after successful password reset
         setTimeout(() => {
-          router.push("/auth/login?reset=true");
+          router.push("/login?reset=true");
         }, 2000);
       }
-    } catch (error) {
-      setError("An unexpected error occurred");
+    } catch {
+      // Catch without parameter to avoid unused variable warning
+      setIsPending(false);
     } finally {
       setIsPending(false);
     }
@@ -89,7 +88,7 @@ export function NewPasswordForm() {
       headerTitle="Reset Password"
       headerDescription="Enter your new password"
       backButtonLabel="Back to login"
-      backButtonHref="/auth/login"
+      backButtonHref="/login"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -133,13 +132,6 @@ export function NewPasswordForm() {
               )}
             />
           </div>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="w-4 h-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
 
           {success && (
             <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">

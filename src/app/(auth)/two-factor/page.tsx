@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { TwoFactorVerifyForm } from "@/components/auth/two-factor-verify-form";
-import { auth } from "@/auth/auth-config";
+import { auth } from "@/lib/auth/auth-config";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {

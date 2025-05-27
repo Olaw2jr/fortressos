@@ -4,12 +4,14 @@ import * as React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-import { verifyEmail } from "@/auth/auth-actions";
+import { verifyEmail } from "@/lib/auth/auth-actions";
 
 import { Button } from "@/components/ui/button";
 import { CardWrapper } from "@/components/auth/card-wrapper";
-import { AlertCircle, Loader2, CheckCircle, Mail } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, CheckCircle, Mail } from "lucide-react";
+
+// Update this path based on your project structure
+const DEFAULT_LOGIN_REDIRECT = "/login";
 
 export function VerifyEmailForm() {
   const router = useRouter();
@@ -17,16 +19,13 @@ export function VerifyEmailForm() {
   const token = searchParams.get("token");
   const email = searchParams.get("email");
 
-  const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const [isPending, setIsPending] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   // Verify token automatically if present
   const verifyToken = useCallback(async () => {
     if (!token) return;
 
-    setError("");
     setSuccess("");
     setIsPending(true);
 
@@ -34,21 +33,21 @@ export function VerifyEmailForm() {
       const result = await verifyEmail(token);
 
       if (result?.error) {
-        setError(result.error);
+        setSuccess(result.error);
       }
 
       if (result?.success) {
         setSuccess(result.success);
         // Redirect to login page after successful verification
         setTimeout(() => {
-          router.push("/auth/login?verified=true");
+          router.push(DEFAULT_LOGIN_REDIRECT);
         }, 2000);
       }
-    } catch (error) {
-      setError("An unexpected error occurred");
+    } catch {
+      // Catching any error without parameter
+      setSuccess("An unexpected error occurred");
     } finally {
       setIsPending(false);
-      setIsLoaded(true);
     }
   }, [token, router]);
 
@@ -70,27 +69,6 @@ export function VerifyEmailForm() {
       );
     }
 
-    // Error state
-    if (error) {
-      return (
-        <div className="flex flex-col items-center gap-4">
-          <Alert variant="destructive">
-            <AlertCircle className="w-4 h-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-          <p className="text-sm text-muted-foreground text-center">
-            Please try again or contact support if you continue to have problems.
-          </p>
-          <Button
-            onClick={() => router.push("/auth/login")}
-            className="w-full"
-          >
-            Back to login
-          </Button>
-        </div>
-      );
-    }
-
     // Success state (token was verified)
     if (success) {
       return (
@@ -103,7 +81,7 @@ export function VerifyEmailForm() {
             Your email has been verified successfully. You can now sign in to your account.
           </p>
           <Button
-            onClick={() => router.push("/auth/login")}
+            onClick={() => router.push("/login")}
             className="w-full"
           >
             Continue to login
@@ -131,7 +109,7 @@ export function VerifyEmailForm() {
         </p>
         <Button
           variant="outline"
-          onClick={() => router.push("/auth/login")}
+          onClick={() => router.push("/login")}
           className="w-full"
         >
           Back to login
@@ -145,7 +123,7 @@ export function VerifyEmailForm() {
       headerTitle="Verify Email"
       headerDescription="Confirm your email address"
       backButtonLabel="Back to login"
-      backButtonHref="/auth/login"
+      backButtonHref="/login"
     >
       <div className="flex flex-col items-center justify-center w-full space-y-6">
         {renderContent()}

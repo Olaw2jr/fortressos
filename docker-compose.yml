@@ -2,7 +2,7 @@ services:
   fortressos:
     build:
       context: .
-      dockerfile: docker/Dockerfile # Using the more specific Dockerfile path
+      dockerfile: docker/Dockerfile
       args: # Optional: Pass build arguments to Dockerfile
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     image: fortressos_app # Tagging the built image
@@ -10,10 +10,20 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NODE_ENV: production
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-appdb}?schema=public"
-      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET}" # Essential for NextAuth
-      NEXTAUTH_URL: "${NEXTAUTH_URL:-http://localhost:3000}" # Default for NextAuth
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: ${DATABASE_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      # Add trusted hosts to fix the UntrustedHost error
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
+      # Email configuration for development (using Mailhog)
+      EMAIL_SERVER_HOST: ${EMAIL_SERVER_HOST:-mailhog}
+      EMAIL_SERVER_PORT: ${EMAIL_SERVER_PORT:-1025}
+      EMAIL_SERVER_USER: ${EMAIL_SERVER_USER:-""}
+      EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD:-""}
+      EMAIL_FROM: ${EMAIL_FROM:-no-reply@fortressos.local}
+      # IMPORTANT: Disable secure connection for Mailhog
+      EMAIL_SERVER_SECURE: ${EMAIL_SERVER_SECURE:-false}
       # Add any other environment variables your Next.js app needs
       # NEXT_PUBLIC_SOME_KEY: "some_value"
     # Command to run migrations then start the application
@@ -33,26 +43,36 @@ services:
       - fortressos_network
 
   db:
-    image: postgres:15-alpine # Consistent and stable Postgres version
-    container_name: fortressos_db_container # Clear container name
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    container_name: fortressos_db_container
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-user} # Default to 'user' if not set in .env
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password} # Default to 'password'
-      POSTGRES_DB: ${POSTGRES_DB:-appdb} # Default to 'appdb'
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432" # Optional: for external access to the DB
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persist database data
-    restart: unless-stopped
+      - postgres_data:/var/lib/postgresql/data
+    restart: ${DB_RESTART:-unless-stopped}
     healthcheck:
-      # Test command now uses environment variables for user and db
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-appdb}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: ${DB_HEALTHCHECK_INTERVAL:-10s}
+      timeout: ${DB_HEALTHCHECK_TIMEOUT:-5s}
+      retries: ${DB_HEALTHCHECK_RETRIES:-5}
       start_period: 10s
     networks:
       - fortressos_network
+
+  # Mail server for testing email functionality
+  mailhog:
+    image: ${MAILHOG_IMAGE:-mailhog/mailhog:latest}
+    container_name: ${MAILHOG_CONTAINER_NAME:-fortressos_mailhog}
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025" # SMTP server
+      - "${MAILHOG_WEB_PORT:-8025}:8025" # Web interface
+    networks:
+      - fortressos_network
+    restart: ${MAILHOG_RESTART:-unless-stopped}
 
 volumes:
   postgres_data: # Defines a named volume for data persistence

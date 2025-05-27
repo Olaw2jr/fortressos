@@ -21,7 +21,7 @@ COPY prisma ./prisma/
 # Install all dependencies (including devDependencies for build and Prisma client generation)
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile --production=false; \
-  elif [ -f package-lock.json ]; then npm install; \
+  elif [ -f package-lock.json ]; then npm install --legacy-peer-deps; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm install --frozen-lockfile --prod=false; \
   else echo "Lockfile not found. Please commit a lockfile." && exit 1; \
   fi
@@ -48,15 +48,23 @@ COPY public ./public/
 # Assuming 'src' directory structure
 COPY src ./src/
 COPY next.config.ts tsconfig.json ./
+# Copy postcss config
+COPY postcss.config.mjs ./
 
 # Set build-time ENV for Next.js telemetry (optional)
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build the Next.js application (Prisma client generation should ideally be a prebuild step)
-# If "prisma generate" is not in prebuild, ensure it's run before this.
-RUN npm run build
-# Consider removing devDependencies after build if not using standalone output or if space is critical
-# RUN npm prune --production
+# Build the Next.js application with proper asset optimization
+# Using build arguments to ensure proper asset paths in production
+ARG NEXT_PUBLIC_ASSET_PREFIX=""
+ENV NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX}
+
+# Build the Next.js application
+RUN npm install -g npm@latest && npm run build
+
+# Create a clean production environment with just what's needed
+# This helps ensure CSS and other assets are properly processed and included
+RUN npm prune --production --legacy-peer-deps
 
 # ---- Production Runner Stage ----
 # Use the same base for consistency, though a distroless or slimmer base could be considered
@@ -74,13 +82,23 @@ ENV DISABLE_PRISMA_TELEMETRY=true
 
 # Create a non-root user and group
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001 -G nodejs
+  adduser -S nextjs -u 1001 -G nodejs
 
-# Copy built application artifacts from the builder stage
-# Leveraging Next.js standalone output
+# Set production environment variable first (helps with asset paths)
+ENV NODE_ENV=production
+
+# Copy the standalone server - this is the main application
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Ensure the complete Next.js structure is maintained
+# First, copy the entire .next directory with all its subdirectories
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+
+# Then copy the public directory which might contain other static assets
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Copy the static directory from the builder stage
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy Prisma schema if needed for runtime (e.g., if migrations are run by this image, though not recommended for CMD)
 # For a lean image where migrations are external, this COPY might be omitted.

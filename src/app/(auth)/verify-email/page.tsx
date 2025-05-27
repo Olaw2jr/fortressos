@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { VerifyEmailForm } from "@/components/auth/verify-email-form";
-import { auth } from "@/auth/auth-config";
+import { auth } from "@/lib/auth/auth-config";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {

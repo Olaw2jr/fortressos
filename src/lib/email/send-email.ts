@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_SERVER_USER,
     pass: process.env.EMAIL_SERVER_PASSWORD,
   },
-  secure: process.env.NODE_ENV === "production", // Use TLS in production
+  secure: process.env.EMAIL_SERVER_SECURE === "true",
 });
 
 /**
@@ -25,9 +25,9 @@ const transporter = nodemailer.createTransport({
  * @param token - The verification token
  */
 export async function sendVerificationEmail(email: string, token: string) {
-  const verificationUrl = `${process.env.NEXTAUTH_URL}/auth/verify-email?token=${token}`;
+  const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}`;
   const html = getVerificationEmailHTML(verificationUrl);
-  
+
   try {
     await transporter.sendMail({
       from: `"FortressOS Security" <${process.env.EMAIL_FROM}>`,
@@ -49,9 +49,9 @@ export async function sendVerificationEmail(email: string, token: string) {
  * @param token - The password reset token
  */
 export async function sendPasswordResetEmail(email: string, token: string) {
-  const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
+  const resetUrl = `${process.env.NEXTAUTH_URL}/new-password?token=${token}`;
   const html = getPasswordResetHTML(resetUrl);
-  
+
   try {
     await transporter.sendMail({
       from: `"FortressOS Security" <${process.env.EMAIL_FROM}>`,
@@ -73,9 +73,9 @@ export async function sendPasswordResetEmail(email: string, token: string) {
  * @param token - The magic link token
  */
 export async function sendMagicLinkEmail(email: string, token: string) {
-  const loginUrl = `${process.env.NEXTAUTH_URL}/auth/magic-link?token=${token}`;
+  const loginUrl = `${process.env.NEXTAUTH_URL}/magic-link?token=${token}`;
   const html = getMagicLinkHTML(loginUrl);
-  
+
   try {
     await transporter.sendMail({
       from: `"FortressOS Security" <${process.env.EMAIL_FROM}>`,

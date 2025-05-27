@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { login } from "@/auth/auth-actions";
+import { login } from "@/lib/auth/auth-actions";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { CardWrapper } from "@/components/auth/card-wrapper";
-import { AlertCircle, Loader2 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 // Schema for the verification code
 const TwoFactorVerifySchema = z.object({
@@ -34,13 +33,12 @@ export function TwoFactorVerifyForm() {
   const email = searchParams.get("email") || "";
   const password = searchParams.get("password") || "";
   
-  const [error, setError] = useState<string | undefined>();
   const [isPending, setIsPending] = useState(false);
 
   // Redirect if email or password is missing
   React.useEffect(() => {
     if (!email || !password) {
-      router.push("/auth/login");
+      router.push("/login");
     }
   }, [email, password, router]);
 
@@ -54,7 +52,6 @@ export function TwoFactorVerifyForm() {
 
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof TwoFactorVerifySchema>) => {
-    setError("");
     setIsPending(true);
 
     try {
@@ -65,16 +62,15 @@ export function TwoFactorVerifyForm() {
       });
 
       if (result?.error) {
-        setError(result.error);
+        setIsPending(false);
         form.reset();
       }
 
       if (result?.success) {
         router.push("/dashboard");
       }
-    } catch (error) {
-      setError("An unexpected error occurred");
-    } finally {
+    } catch {
+      // Catch any error without using a parameter
       setIsPending(false);
     }
   };
@@ -84,7 +80,7 @@ export function TwoFactorVerifyForm() {
       headerTitle="Two-Factor Authentication"
       headerDescription="Enter your authentication code"
       backButtonLabel="Back to login"
-      backButtonHref="/auth/login"
+      backButtonHref="/login"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -109,13 +105,6 @@ export function TwoFactorVerifyForm() {
               )}
             />
           </div>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="w-4 h-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
 
           <Button
             type="submit"

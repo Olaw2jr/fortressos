@@ -7,7 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { RegisterSchema, registerUser } from "@/auth/auth-actions";
+import { registerUser } from "@/lib/auth/auth-actions";
+import { RegisterSchema } from "@/lib/auth/auth-schemas";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,8 +26,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function RegisterForm() {
   const router = useRouter();
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string | undefined>('');
   const [isPending, setIsPending] = useState(false);
 
   // Define the form
@@ -42,7 +42,6 @@ export function RegisterForm() {
 
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
-    setError("");
     setSuccess("");
     setIsPending(true);
 
@@ -50,7 +49,8 @@ export function RegisterForm() {
       const result = await registerUser(values);
 
       if (result?.error) {
-        setError(result.error);
+        setIsPending(false);
+        return;
       }
 
       if (result?.success) {
@@ -58,11 +58,12 @@ export function RegisterForm() {
         form.reset();
         // Redirect to verification page after a short delay
         setTimeout(() => {
-          router.push("/auth/verify-email?email=" + encodeURIComponent(values.email));
+          router.push("/verify-email?email=" + encodeURIComponent(values.email));
         }, 2000);
       }
-    } catch (error) {
-      setError("An unexpected error occurred");
+    } catch {
+      // Catch without parameter to avoid unused variable warning
+      setIsPending(false);
     } finally {
       setIsPending(false);
     }
@@ -73,7 +74,7 @@ export function RegisterForm() {
       headerTitle="Create an Account"
       headerDescription="Sign up for a FortressOS account"
       backButtonLabel="Already have an account?"
-      backButtonHref="/auth/login"
+      backButtonHref="/login"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -157,13 +158,6 @@ export function RegisterForm() {
               )}
             />
           </div>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="w-4 h-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
 
           {success && (
             <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">

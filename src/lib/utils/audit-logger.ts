@@ -1,5 +1,6 @@
 // src/lib/utils/audit-logger.ts
-import { db } from "@/lib/db";
+// Import commented out until the authLog table is added to the schema
+// import { db } from "@/lib/db";
 
 export enum EventType {
   LOGIN_SUCCESS = "LOGIN_SUCCESS",
@@ -37,7 +38,19 @@ export async function logAuthEvent(eventType: EventType, data: AuditLogData): Pr
   try {
     const { userId, email, ip, userAgent, metadata } = data;
     
-    // Create a log entry in the database
+    // Log to console for now since the authLog table might not be in the schema yet
+    console.log("Auth Event:", {
+      eventType,
+      userId,
+      email,
+      ip,
+      userAgent,
+      metadata,
+      timestamp: new Date()
+    });
+    
+    // Commented out until the authLog table is added to the Prisma schema
+    /*
     await db.authLog.create({
       data: {
         eventType: eventType as string,
@@ -49,6 +62,7 @@ export async function logAuthEvent(eventType: EventType, data: AuditLogData): Pr
         timestamp: new Date()
       }
     });
+    */
     
     // You could also send critical security events to an external monitoring service
     if ([

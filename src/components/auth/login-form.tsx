@@ -7,8 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { LoginSchema } from "@/auth/auth-actions";
-import { login, sendMagicLink } from "@/auth/auth-actions";
+import { login, sendMagicLink, resendVerificationEmail } from "@/lib/auth/auth-actions";
+import { LoginSchema } from "@/lib/auth/auth-schemas";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,8 @@ export function LoginForm() {
   const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [isMagicLinkSent, setIsMagicLinkSent] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState("");
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
 
   // Define the form
   const form = useForm<z.infer<typeof LoginSchema>>({
@@ -48,10 +50,18 @@ export function LoginForm() {
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
+    setUnverifiedEmail(null);
     setIsPending(true);
 
     try {
       const result = await login(values);
+
+      if (result?.error === "email-not-verified") {
+        // Handle unverified email case
+        setUnverifiedEmail(result.email || values.email);
+        setIsPending(false);
+        return;
+      }
 
       if (result?.error) {
         setError(result.error);
@@ -74,15 +84,41 @@ export function LoginForm() {
     }
   };
 
+  // Handle verification email resend
+  const handleResendVerification = async () => {
+    if (!unverifiedEmail) return;
+
+    setIsResendingVerification(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const result = await resendVerificationEmail(unverifiedEmail);
+
+      if (result?.error) {
+        setError(result.error);
+      }
+
+      if (result?.success) {
+        setSuccess(result.success);
+      }
+    } catch (err) {
+      console.error("Error resending verification:", err);
+      setError("Failed to resend verification email");
+    } finally {
+      setIsResendingVerification(false);
+    }
+  };
+
   // Handle magic link request
   const onMagicLinkRequest = async () => {
     const email = form.getValues("email");
-    
+
     if (!email || !z.string().email().safeParse(email).success) {
       setError("Please enter a valid email address");
       return;
     }
-    
+
     setError("");
     setSuccess("");
     setIsPending(true);
@@ -111,8 +147,8 @@ export function LoginForm() {
     <CardWrapper
       headerTitle="Sign In"
       headerDescription="Welcome back to FortressOS"
-      backButtonLabel="Don't have an account?"
-      backButtonHref="/auth/register"
+      backButtonLabel="Don&apos;t have an account?"
+      backButtonHref="/register"
     >
       {isMagicLinkSent ? (
         <div className="space-y-4 text-center">
@@ -139,6 +175,53 @@ export function LoginForm() {
       ) : (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {error && error !== "email-not-verified" && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert variant="default" className="bg-green-50 text-green-800 border-green-200 mb-4">
+                <AlertCircle className="w-4 h-4 text-green-500" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
+            {unverifiedEmail && (
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-md border border-yellow-200 dark:border-yellow-800 mb-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <AlertCircle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                      Please verify your email
+                    </h3>
+                    <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                      <p>
+                        We&apos;ve sent a verification link to <span className="font-medium">{unverifiedEmail}</span>.
+                        Please check your inbox and click the link to verify your email address.
+                      </p>
+                      <p className="mt-2">
+                        Didn&apos;t receive the email? Check your spam folder or{" "}
+                        <button
+                          type="button"
+                          onClick={handleResendVerification}
+                          disabled={isResendingVerification}
+                          className="font-medium text-yellow-700 dark:text-yellow-300 hover:text-yellow-600 dark:hover:text-yellow-200 underline"
+                        >
+                          {isResendingVerification ? "Sending..." : "click here to resend"}
+                        </button>
+                        .
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4">
               {!showTwoFactor && (
                 <>
@@ -160,7 +243,7 @@ export function LoginForm() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="password"
@@ -182,7 +265,7 @@ export function LoginForm() {
                             className="px-0"
                             asChild
                           >
-                            <a href="/auth/reset-password">
+                            <a href="/reset-password">
                               Forgot password?
                             </a>
                           </Button>
@@ -216,20 +299,6 @@ export function LoginForm() {
               )}
             </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="w-4 h-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {success && (
-              <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
-                <AlertCircle className="w-4 h-4" />
-                <AlertDescription>{success}</AlertDescription>
-              </Alert>
-            )}
-
             <Button
               type="submit"
               className="w-full"
@@ -253,10 +322,10 @@ export function LoginForm() {
         </div>
       </div>
 
-      <Button 
-        variant="outline" 
-        type="button" 
-        className="w-full" 
+      <Button
+        variant="outline"
+        type="button"
+        className="w-full"
         onClick={onMagicLinkRequest}
         disabled={isPending || isMagicLinkSent}
       >
