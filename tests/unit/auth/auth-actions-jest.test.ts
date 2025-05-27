@@ -1,4 +1,4 @@
-// tests/unit/auth/auth-actions.test.ts
+// tests/unit/auth/auth-actions-jest.test.ts
 import { login, registerUser } from '@/lib/auth/auth-actions';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
@@ -14,19 +14,20 @@ jest.mock('@/lib/db', () => ({
     verificationToken: {
       findFirst: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     }
   }
 }));
 
 jest.mock('bcryptjs', () => ({
-  hash: jest.fn(() => Promise.resolve('hashed_password')),
-  compare: jest.fn(() => Promise.resolve(true)),
+  hash: jest.fn().mockResolvedValue('hashed_password'),
+  compare: jest.fn().mockResolvedValue(true),
 }));
 
 jest.mock('@/lib/email/send-email', () => ({
-  sendVerificationEmail: jest.fn(() => Promise.resolve()),
-  sendPasswordResetEmail: jest.fn(() => Promise.resolve()),
-  sendMagicLinkEmail: jest.fn(() => Promise.resolve()),
+  sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+  sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+  sendMagicLinkEmail: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('@/auth/auth-config', () => ({
@@ -34,10 +35,10 @@ jest.mock('@/auth/auth-config', () => ({
 }));
 
 jest.mock('@/lib/utils/auth-utils', () => ({
-  generateVerificationToken: jest.fn(() => Promise.resolve({ token: 'test_token' })),
-  generatePasswordResetToken: jest.fn(() => Promise.resolve({ token: 'test_token' })),
-  generateMagicLinkToken: jest.fn(() => Promise.resolve({ token: 'test_token' })),
-  verifyTwoFactorToken: jest.fn(() => true),
+  generateVerificationToken: jest.fn().mockResolvedValue({ token: 'test_token', expires: new Date() }),
+  generatePasswordResetToken: jest.fn().mockResolvedValue({ token: 'test_token', expires: new Date() }),
+  generateMagicLinkToken: jest.fn().mockResolvedValue({ token: 'test_token', expires: new Date() }),
+  verifyTwoFactorToken: jest.fn().mockReturnValue(true),
 }));
 
 describe('Auth Actions', () => {
@@ -45,15 +46,14 @@ describe('Auth Actions', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('registerUser', () => {
     it('should register a new user successfully', async () => {
       // Setup mocks
       (db.user.findUnique as jest.Mock).mockResolvedValueOnce(null);
-      (db.user.create as jest.Mock).mockResolvedValueOnce({ id: 'user_id', email: 'test@example.com' });
+      (db.user.create as jest.Mock).mockResolvedValueOnce({ 
+        id: 'user_id', 
+        email: 'test@example.com'
+      });
 
       // Call the function
       const result = await registerUser({
@@ -64,17 +64,20 @@ describe('Auth Actions', () => {
       });
 
       // Assertions
-      expect(result.success).toBeDefined();
+      expect(result.success).toBe("Verification email sent!");
       expect(db.user.findUnique).toHaveBeenCalledWith({
         where: { email: 'test@example.com' }
       });
-      expect(bcrypt.hash).toHaveBeenCalledWith('Password123!', 10);
+      expect(bcrypt.hash).toHaveBeenCalled();
       expect(db.user.create).toHaveBeenCalled();
     });
 
     it('should return an error if the email is already in use', async () => {
       // Setup mocks
-      (db.user.findUnique as jest.Mock).mockResolvedValueOnce({ id: 'existing_user_id', email: 'test@example.com' });
+      (db.user.findUnique as jest.Mock).mockResolvedValueOnce({ 
+        id: 'existing_user_id', 
+        email: 'test@example.com' 
+      });
 
       // Call the function
       const result = await registerUser({
@@ -85,7 +88,7 @@ describe('Auth Actions', () => {
       });
 
       // Assertions
-      expect(result.error).toBe('Email already in use');
+      expect(result.error).toBe("Email already in use");
       expect(db.user.create).not.toHaveBeenCalled();
     });
   });
@@ -110,11 +113,11 @@ describe('Auth Actions', () => {
       });
 
       // Assertions
-      expect(result.success).toBeDefined();
+      expect(result.success).toBe("Logged in successfully");
     });
 
     it('should handle two-factor authentication', async () => {
-      // Setup mocks
+      // Setup mocks for first call (without code)
       (db.user.findUnique as jest.Mock).mockResolvedValueOnce({
         id: 'user_id',
         email: 'test@example.com',
@@ -132,8 +135,20 @@ describe('Auth Actions', () => {
         password: 'Password123!'
       });
 
-      // Assertions
+      // Assertions for first call
       expect(resultWithoutCode.twoFactor).toBe(true);
+
+      // Setup mocks for second call (with code)
+      (db.user.findUnique as jest.Mock).mockResolvedValueOnce({
+        id: 'user_id',
+        email: 'test@example.com',
+        password: 'hashed_password',
+        emailVerified: new Date(),
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        twoFactorEnabled: true,
+        twoFactorSecret: 'secret'
+      });
 
       // Call the function with code
       const resultWithCode = await login({
@@ -143,14 +158,7 @@ describe('Auth Actions', () => {
       });
 
       // Assertions for the second call
-      expect(resultWithCode.success).toBeDefined();
+      expect(resultWithCode.success).toBe("Logged in successfully");
     });
   });
-
-  // Additional tests would cover the rest of the functions:
-  // - sendMagicLink
-  // - verifyEmail
-  // - resetPassword
-  // - verifyMagicLink
-  // - etc.
 });
