@@ -22,16 +22,17 @@ export function Header() {
       <Separator orientation="vertical" className="mr-2 h-4" />
 
       <div className="flex w-full items-center justify-between">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <form className="relative flex flex-1 md:max-w-sm lg:max-w-md">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
+            type="search"
             placeholder="Search..."
-            className="pl-8 bg-muted/25 text-muted-foreground h-8 w-full md:w-64 lg:w-96"
+            className="h-9 w-full rounded-md border border-input bg-background pl-8 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
           <kbd className="bg-muted pointer-events-none absolute right-2 top-[0.3rem] hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
             <span className="text-xs">⌘</span>K
           </kbd>
-        </div>
+        </form>
 
         <div className="flex items-center gap-2">
           <NotificationsDropdown />

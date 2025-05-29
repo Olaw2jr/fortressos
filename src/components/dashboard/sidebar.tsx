@@ -68,17 +68,17 @@ const data = {
       items: [
         {
           title: "Dashboard",
-          url: "#",
+          url: "/dashboard",
           icon: LayoutDashboard,
         },
         {
           title: "History",
-          url: "#",
+          url: "/history",
           icon: History,
         },
         {
           title: "Reports",
-          url: "#",
+          url: "/reports",
           icon: ClipboardList,
         },
       ],
@@ -91,55 +91,55 @@ const data = {
       items: [
         {
           title: "Assessments",
-          url: "#",
+          url: "/assessments",
           icon: Target,
         },
         {
           title: "Threats",
-          url: "#",
+          url: "/threats",
           icon: AlertTriangle,
         },
         {
           title: "Vulnerabilities",
-          url: "#",
+          url: "/vulnerabilities",
           icon: FileWarning,
         },
         {
           title: "Assets",
-          url: "#",
+          url: "/assets",
           icon: Database,
         },
       ],
     },
     {
       title: "Frameworks",
-      url: "#",
+      url: "/frameworks",
       icon: BookOpen,
       isActive: true,
       items: [
         {
           title: "NIST SP 800-53",
-          url: "#",
+          url: "/frameworks/nist",
           icon: Shield,
         },
         {
           title: "ISO 27001",
-          url: "#",
+          url: "/frameworks/iso",
           icon: BadgeCheck,
         },
         {
           title: "CIS Controls",
-          url: "#",
+          url: "/frameworks/cis",
           icon: CircuitBoard,
         },
         {
           title: "PCI DSS",
-          url: "#",
+          url: "/frameworks/pci",
           icon: Landmark,
         },
         {
           title: "HIPAA",
-          url: "#",
+          url: "/frameworks/hipaa",
           icon: Hospital,
         },
       ],
